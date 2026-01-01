@@ -68,7 +68,7 @@ function renderFiles(files) {
                 loadFiles(item.id);
             } else {
                 // Если файл - скачиваем
-                downloadFile(item.file_id);
+                downloadFile(item);
             }
         };
 
@@ -77,18 +77,30 @@ function renderFiles(files) {
 }
 
 // Функция скачивания
-async function downloadFile(fileId) {
-    tg.MainButton.showProgress(); // Показать крутилку в интерфейсе ТГ
+async function downloadFile(item) {
+    tg.MainButton.showProgress();
     
     try {
-        await fetch(`${API_URL}/api/download`, {
+        // Мы отправляем user_id, file_id И ТЕПЕРЬ ЕЩЁ name
+        const response = await fetch(`${API_URL}/api/download`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: USER_ID, file_id: fileId })
+            body: JSON.stringify({ 
+                user_id: USER_ID, 
+                file_id: item.file_id,
+                file_name: item.name 
+            })
         });
+
+        // Если сервер ответил ошибкой (не 200)
+        if (!response.ok) {
+            throw new Error("Ошибка сервера");
+        }
+
         tg.showAlert('Файл отправлен тебе в чат!');
     } catch (e) {
-        tg.showAlert('Ошибка скачивания');
+        tg.showAlert('Ошибка! Проверь, не заблокировал ли ты бота?');
+        console.error(e);
     }
     
     tg.MainButton.hideProgress();
