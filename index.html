@@ -2,50 +2,62 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TG Cloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cloud</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Шапка с фильтрами -->
-    <div class="header">
-        <div class="title-row">
-            <h1>Облако</h1>
-            <button class="add-folder-btn" onclick="createFolder()"><i class="fas fa-folder-plus"></i></button>
-        </div>
-        
-        <!-- Фильтры -->
-        <div class="filters">
-            <span class="filter-chip active" onclick="setFilter('all', this)">Все</span>
-            <span class="filter-chip" onclick="setFilter('image', this)">Фото</span>
-            <span class="filter-chip" onclick="setFilter('video', this)">Видео</span>
-            <span class="filter-chip" onclick="setFilter('doc', this)">Файлы</span>
+    <!-- Верхняя навигация (появляется только внутри папок) -->
+    <div class="top-nav" id="top-nav" style="display: none;">
+        <div class="breadcrumbs" onclick="goBack()">
+            <i class="fas fa-chevron-left"></i> Назад
         </div>
     </div>
 
-    <div class="breadcrumbs" id="breadcrumbs">
-        <span onclick="goToRoot()">🏠 Главная</span>
+    <!-- Сетка файлов -->
+    <div class="grid" id="file-grid"></div>
+
+    <!-- Кнопка "+" внутри папки -->
+    <div class="fab-add" id="fab-add" onclick="handleAddClick()">
+        <i class="fas fa-plus"></i>
     </div>
 
-    <div class="grid" id="file-grid">
-        <div class="loader">Загрузка файлов...</div>
+    <!-- Нижняя панель навигации -->
+    <div class="bottom-bar">
+        <i class="nav-item fas fa-th-large active" onclick="setTab('all', this)"></i> <!-- Все -->
+        <i class="nav-item fas fa-image" onclick="setTab('image', this)"></i> <!-- Фото -->
+        <i class="nav-item fas fa-video" onclick="setTab('video', this)"></i> <!-- Видео -->
+        <i class="nav-item fas fa-file-alt" onclick="setTab('doc', this)"></i> <!-- Файлы -->
+        <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i> <!-- Папки -->
     </div>
 
-    <div class="fab" onclick="tg.showAlert('Просто отправь файл боту!')">
-        <i class="fas fa-cloud-upload-alt"></i>
-    </div>
-
-    <!-- МОДАЛЬНОЕ ОКНО (Скрыто по умолчанию) -->
-    <div id="folder-modal" class="modal-overlay" style="display: none;">
+    <!-- МОДАЛКА 1: Создание папки -->
+    <div id="modal-create-folder" class="modal-overlay">
         <div class="modal-box">
             <h3>Новая папка</h3>
-            <input type="text" id="folder-input" placeholder="Название..." autocomplete="off">
+            <input type="text" class="modal-input" id="folder-input" placeholder="Название...">
             <div class="modal-buttons">
-                <button class="btn-cancel" onclick="closeModal()">Отмена</button>
-                <button class="btn-create" onclick="submitFolder()">Создать</button>
+                <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
+                <button class="btn btn-primary" onclick="submitCreateFolder()">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА 2: Выбор файлов для добавления -->
+    <div id="modal-add-files" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Добавить в папку</h3>
+            <p style="font-size: 12px; color: #888;">Выберите файлы из общего списка</p>
+            <div class="modal-list" id="picker-list">
+                <!-- Сюда JS загрузит файлы -->
+                Загрузка...
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
+                <button class="btn btn-primary" onclick="submitMoveFiles()">Добавить</button>
             </div>
         </div>
     </div>

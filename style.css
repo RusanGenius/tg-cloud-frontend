@@ -1,121 +1,139 @@
+:root {
+    --bg-color: #000000;
+    --glass-bg: rgba(30, 30, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent: #0a84ff;
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e93;
+}
+
 body {
-    background-color: var(--tg-theme-bg-color, #1c1c1e);
-    color: var(--tg-theme-text-color, #ffffff);
-    font-family: sans-serif;
-    margin: 0; padding: 15px; padding-bottom: 80px;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0; padding: 0;
+    padding-bottom: 100px; /* Место под нижнюю панель */
+    -webkit-font-smoothing: antialiased;
 }
 
-.title-row {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
-}
-.add-folder-btn {
-    background: none; border: none; color: #007aff; font-size: 24px; cursor: pointer;
-}
-
-/* Фильтры */
-.filters {
-    display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 15px;
-}
-.filter-chip {
-    background: var(--tg-theme-secondary-bg-color, #2c2c2e);
-    padding: 8px 16px; border-radius: 20px; font-size: 14px; white-space: nowrap; cursor: pointer;
-    border: 1px solid transparent;
-}
-.filter-chip.active {
-    background: #007aff; color: white;
-}
-
+/* Сетка файлов */
 .grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; /* 2 колонки */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 колонки для компактности */
+    gap: 8px;
+    padding: 15px;
+    padding-top: 60px; /* Место под хлебные крошки */
 }
 
+/* Карточка файла (Гласморфизм) */
 .item {
-    background: var(--tg-theme-secondary-bg-color, #2c2c2e);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
+    aspect-ratio: 1 / 1;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
-    aspect-ratio: 1 / 1; /* Квадратные плитки */
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 
-/* Картинки на весь блок */
+/* Превью и иконки */
 .item-preview {
-    width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
-    opacity: 0.6; /* Немного затемняем, чтобы текст был виден */
+    width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0.7;
 }
-
-.icon { font-size: 40px; margin-bottom: 5px; z-index: 2; }
-.folder-icon { color: #fea50a; font-size: 50px; } /* Желтые папки */
+.icon { font-size: 32px; z-index: 2; margin-bottom: 5px; }
+.folder-icon { color: #ffd60a; } /* Золотой для папок */
+.file-icon { color: var(--text-secondary); }
 
 .name {
-    position: absolute; bottom: 10px; left: 10px; right: 10px;
-    font-size: 12px; z-index: 2;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    z-index: 2; font-size: 10px; text-align: center;
+    padding: 0 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 
 /* Кнопка удаления */
 .delete-btn {
-    position: absolute; top: 5px; right: 5px;
-    color: rgba(255,255,255,0.6); padding: 5px; z-index: 10;
-}
-.delete-btn:hover { color: #ff3b30; }
-
-.breadcrumbs { margin-bottom: 15px; color: #007aff; font-weight: 500; cursor: pointer;}
-.fab {
-    position: fixed; bottom: 20px; right: 20px;
-    background: #007aff; color: white;
-    width: 56px; height: 56px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 24px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    position: absolute; top: 2px; right: 2px; padding: 4px; z-index: 10;
+    color: rgba(255,255,255,0.4);
 }
 
-/* Стили модального окна */
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Затемнение фона */
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px); /* Эффект размытия (как в iOS) */
+/* Навигация (Хлебные крошки) */
+.top-nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 50px;
+    display: flex; align-items: center; padding: 0 20px;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+    z-index: 50; border-bottom: 1px solid var(--glass-border);
+}
+.breadcrumbs {
+    font-size: 18px; font-weight: 600; color: var(--accent);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
 }
 
-.modal-box {
-    background: var(--tg-theme-bg-color, #1c1c1e);
-    border: 1px solid var(--tg-theme-secondary-bg-color, #2c2c2e);
-    padding: 20px;
-    border-radius: 16px;
-    width: 80%;
-    max-width: 300px;
+/* НИЖНЯЯ ПАНЕЛЬ (Гласморфизм) */
+.bottom-bar {
+    position: fixed; bottom: 20px; left: 20px; right: 20px;
+    height: 60px;
+    background: rgba(40, 40, 40, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 100;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    text-align: center;
 }
 
-.modal-box h3 { margin-top: 0; margin-bottom: 15px; }
-
-.modal-box input {
-    width: 90%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background: var(--tg-theme-secondary-bg-color, #2c2c2e);
-    color: var(--tg-theme-text-color, white);
-    margin-bottom: 20px;
-    font-size: 16px;
-    outline: none;
+.nav-item {
+    color: var(--text-secondary);
+    font-size: 20px; padding: 10px;
+    transition: 0.2s; cursor: pointer;
 }
-.modal-box input:focus { border-color: #007aff; }
-
-.modal-buttons {
-    display: flex; gap: 10px; justify-content: center;
+.nav-item.active {
+    color: var(--accent);
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(10, 132, 255, 0.5);
 }
 
-.modal-buttons button {
-    border: none; padding: 10px 20px; border-radius: 8px;
-    font-size: 14px; cursor: pointer; font-weight: 600;
+/* Плавающая кнопка (внутри папки) */
+.fab-add {
+    position: fixed; bottom: 95px; right: 20px;
+    width: 50px; height: 50px;
+    background: var(--accent); color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 5px 15px rgba(0, 132, 255, 0.4);
+    z-index: 90;
+    display: none; /* Скрыта по умолчанию */
 }
 
-.btn-cancel { background: #3a3a3c; color: #ff3b30; }
-.btn-create { background: #007aff; color: white; }
+/* Модальные окна (Стили из прошлого шага + улучшения) */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+}
+.modal-box {
+    background: #1c1c1e; border: 1px solid #333;
+    padding: 20px; border-radius: 20px; width: 85%; max-width: 350px;
+    text-align: center; color: white;
+}
+.modal-list {
+    max-height: 300px; overflow-y: auto; text-align: left; margin: 15px 0;
+}
+.modal-item {
+    padding: 10px; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 10px;
+}
+.modal-item.selected { background: #0a84ff33; }
+.modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+.btn { border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-sec { background: #3a3a3c; color: #ff3b30; }
+.modal-input {
+    width: 90%; background: #2c2c2e; border: 1px solid #444; color: white;
+    padding: 10px; border-radius: 10px; outline: none; margin-bottom: 10px;
+}
