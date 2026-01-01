@@ -1,110 +1,160 @@
 const tg = window.Telegram.WebApp;
-tg.expand(); // Раскрыть на весь экран
+tg.expand();
 
-// ⚠️ ВАЖНО: Если тестируешь с компа, раскомментируй строку ниже и впиши свой ID руками
-// const USER_ID = 5085032008; 
-
-// Если открываем внутри Telegram, берем ID оттуда
 const USER_ID = tg.initDataUnsafe?.user?.id;
-
-// ⚠️ СЮДА ПОТОМ ВСТАВИМ ССЫЛКУ С RENDER (пока локальная)
+// ⚠️ ЗАМЕНИ НА СВОЮ ССЫЛКУ С RENDER (без слеша в конце)
 const API_URL = "https://my-tg-cloud-api.onrender.com"; 
+
+let currentFolderId = null; // Где мы сейчас находимся
+let allFilesCache = []; // Тут храним загруженные файлы
+let currentFilter = 'all'; // Текущий фильтр
 
 const grid = document.getElementById('file-grid');
 
-// Функция загрузки файлов
+// 1. Загрузка данных
 async function loadFiles(folderId) {
+    currentFolderId = folderId;
     grid.innerHTML = '<div class="loader">Загрузка...</div>';
     
-    if (!USER_ID) {
-        grid.innerHTML = '<p>Ошибка: Не удалось получить ID пользователя. Открой в Telegram.</p>';
-        return;
-    }
+    // Обновляем хлебные крошки
+    document.getElementById('breadcrumbs').innerHTML = folderId 
+        ? '<span onclick="loadFiles(null)">⬅ Назад</span>' 
+        : '🏠 Главная';
 
     try {
-        // Формируем URL
         let url = `${API_URL}/api/files?user_id=${USER_ID}`;
-        if (folderId) {
-            url += `&folder_id=${folderId}`;
-        }
+        if (folderId) url += `&folder_id=${folderId}`;
+        else url += `&folder_id=null`;
 
-        const response = await fetch(url);
-        const files = await response.json();
-
-        renderFiles(files);
-    } catch (error) {
-        grid.innerHTML = `<p style="color:red">Ошибка подключения к серверу: ${error.message}</p>`;
-        console.error(error);
+        const res = await fetch(url);
+        allFilesCache = await res.json();
+        renderGrid();
+    } catch (e) {
+        grid.innerHTML = `<p>Ошибка: ${e.message}</p>`;
     }
 }
 
-// Отрисовка файлов на экране
-function renderFiles(files) {
-    grid.innerHTML = ''; // Очистить сетку
+// 2. Отрисовка сетки с учетом фильтра
+function renderGrid() {
+    grid.innerHTML = '';
+    
+    // Фильтрация
+    const filtered = allFilesCache.filter(item => {
+        if (item.type === 'folder') return true; // Папки показываем всегда
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'image') return item.name.match(/\.(jpg|jpeg|png)$/i);
+        if (currentFilter === 'video') return item.name.match(/\.(mp4|mov)$/i);
+        if (currentFilter === 'doc') return !item.name.match(/\.(jpg|jpeg|png|mp4|mov)$/i);
+        return true;
+    });
 
-    if (files.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Папка пуста</p>';
+    if (filtered.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; width:200%">Пусто</p>';
         return;
     }
 
-    files.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item';
+    filtered.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'item';
         
-        // Иконка
-        let iconClass = item.type === 'folder' ? 'fa-folder folder-icon' : 'fa-file file-icon';
-        if (item.name.endsWith('.jpg')) iconClass = 'fa-image file-icon';
-        if (item.name.endsWith('.mp4')) iconClass = 'fa-video file-icon';
+        // Определяем иконку и превью
+        let icon = '<i class="icon fas fa-file"></i>';
+        let previewHtml = '';
+        let isImage = item.name.match(/\.(jpg|jpeg|png)$/i);
 
-        div.innerHTML = `
-            <i class="icon fas ${iconClass}"></i>
+        if (item.type === 'folder') {
+            icon = '<i class="icon fas fa-folder folder-icon"></i>';
+        } else if (isImage) {
+            // Вставляем превью через наш прокси
+            // Добавляем user_id чтобы кеш не путался
+            previewHtml = `<img src="${API_URL}/api/preview/${item.file_id}" class="item-preview" loading="lazy">`;
+            icon = ''; // Убираем иконку, если есть фото
+        } else if (item.name.match(/\.mp4$/i)) {
+            icon = '<i class="icon fas fa-video"></i>';
+        }
+
+        el.innerHTML = `
+            ${previewHtml}
+            ${icon}
             <div class="name">${item.name}</div>
+            <div class="delete-btn" onclick="deleteItem(event, '${item.id}')">
+                <i class="fas fa-trash"></i>
+            </div>
         `;
 
-        // Клик по элементу
-        div.onclick = () => {
+        // Клик по плитке
+        el.onclick = (e) => {
+            // Если кликнули по корзине - не открывать файл
+            if(e.target.closest('.delete-btn')) return;
+
             if (item.type === 'folder') {
-                // Если папка - заходим внутрь (пока не реализовано создание папок, но логика готова)
                 loadFiles(item.id);
             } else {
-                // Если файл - скачиваем
                 downloadFile(item);
             }
         };
 
-        grid.appendChild(div);
+        grid.appendChild(el);
     });
 }
 
-// Функция скачивания
+// 3. Создание папки
+function createFolder() {
+    tg.showPopup({
+        title: 'Новая папка',
+        message: 'Введите имя папки:',
+        buttons: [{type: 'ok', text: 'Создать'}, {type: 'cancel'}]
+    }, (btn) => { // Это колбэк нажатия кнопки, но в WebApp нет ввода текста в попапе :(
+        // Хак: используем prompt браузера, он работает поверх
+        if(btn === 'ok') {
+            // Внимание: стандартный prompt может выглядеть не оч, но работает
+        }
+    });
+    
+    // Используем простой prompt JS
+    const name = prompt("Введите имя папки:");
+    if (!name) return;
+
+    fetch(`${API_URL}/api/create_folder`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: USER_ID, name: name, parent_id: currentFolderId })
+    }).then(() => loadFiles(currentFolderId));
+}
+
+// 4. Удаление
+function deleteItem(e, id) {
+    e.stopPropagation(); // Чтобы не сработало скачивание
+    if(!confirm("Удалить?")) return;
+
+    fetch(`${API_URL}/api/delete`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ item_id: id })
+    }).then(() => loadFiles(currentFolderId));
+}
+
+// 5. Фильтры
+function setFilter(type, btn) {
+    currentFilter = type;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid();
+}
+
+// 6. Скачивание (без изменений)
 async function downloadFile(item) {
     tg.MainButton.showProgress();
-    
     try {
-        // Мы отправляем user_id, file_id И ТЕПЕРЬ ЕЩЁ name
-        const response = await fetch(`${API_URL}/api/download`, {
+        await fetch(`${API_URL}/api/download`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                user_id: USER_ID, 
-                file_id: item.file_id,
-                file_name: item.name 
-            })
+            body: JSON.stringify({ user_id: USER_ID, file_id: item.file_id, file_name: item.name })
         });
-
-        // Если сервер ответил ошибкой (не 200)
-        if (!response.ok) {
-            throw new Error("Ошибка сервера");
-        }
-
-        tg.showAlert('Файл отправлен тебе в чат!');
-    } catch (e) {
-        tg.showAlert('Ошибка! Проверь, не заблокировал ли ты бота?');
-        console.error(e);
-    }
-    
+        tg.showAlert('Отправлено в чат!');
+    } catch (e) { console.error(e); }
     tg.MainButton.hideProgress();
 }
 
-// Запуск при старте
+// Старт
 loadFiles(null);

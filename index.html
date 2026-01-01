@@ -5,31 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TG Cloud</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- Шапка с фильтрами -->
     <div class="header">
-        <h1>Мое Облако</h1>
-        <p id="storage-info">Загрузка...</p>
+        <div class="title-row">
+            <h1>Облако</h1>
+            <button class="add-folder-btn" onclick="createFolder()"><i class="fas fa-folder-plus"></i></button>
+        </div>
+        
+        <!-- Фильтры -->
+        <div class="filters">
+            <span class="filter-chip active" onclick="setFilter('all', this)">Все</span>
+            <span class="filter-chip" onclick="setFilter('image', this)">Фото</span>
+            <span class="filter-chip" onclick="setFilter('video', this)">Видео</span>
+            <span class="filter-chip" onclick="setFilter('doc', this)">Файлы</span>
+        </div>
     </div>
 
-    <!-- Хлебные крошки (Навигация: Главная > Папка) -->
     <div class="breadcrumbs" id="breadcrumbs">
-        <span onclick="loadFiles(null)">🏠 Главная</span>
+        <span onclick="goToRoot()">🏠 Главная</span>
     </div>
 
-    <!-- Сетка с файлами -->
     <div class="grid" id="file-grid">
-        <!-- Сюда JavaScript будет вставлять папки и файлы -->
         <div class="loader">Загрузка файлов...</div>
     </div>
 
-    <!-- Кнопка добавления (для красоты пока) -->
-    <div class="fab" onclick="alert('Чтобы добавить файл, просто отправь его боту в чат!')">
-        <i class="fas fa-plus"></i>
+    <div class="fab" onclick="tg.showAlert('Просто отправь файл боту!')">
+        <i class="fas fa-cloud-upload-alt"></i>
     </div>
 
     <script src="app.js"></script>
