@@ -128,7 +128,7 @@ async function submitFolder() {
     tg.MainButton.showProgress();
 
     try {
-        await fetch(`${API_URL}/api/create_folder`, {
+        const response = await fetch(`${API_URL}/api/create_folder`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
@@ -138,11 +138,19 @@ async function submitFolder() {
             })
         });
         
-        // Обновляем список файлов
-        loadFiles(currentFolderId);
+        // ВАЖНО: Проверяем, ответил ли сервер успехом
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Ошибка сервера");
+        }
+        
+        // Если всё ок - обновляем список
+        await loadFiles(currentFolderId);
         
     } catch (e) {
-        tg.showAlert("Ошибка создания папки");
+        // Показываем реальную ошибку
+        tg.showAlert(`Не удалось создать папку: ${e.message}`);
+        console.error(e);
     }
     
     tg.MainButton.hideProgress();
