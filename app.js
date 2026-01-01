@@ -98,7 +98,6 @@ function renderGrid() {
         if (item.type === 'folder') {
             content = `<i class="icon fas fa-folder folder-icon"></i>`;
         } else {
-            // Если фото - превью
             if (item.name.match(/\.(jpg|png)$/i)) {
                 content = `<img src="${API_URL}/api/preview/${item.file_id}" class="item-preview" loading="lazy">`;
             } else if (item.name.match(/\.mp4$/i)) {
@@ -108,10 +107,17 @@ function renderGrid() {
             }
         }
 
+        // Логика кнопки удаления:
+        // 1. Если мы внутри папки (currentState.folderId) -> можно удалять файлы
+        // 2. Если это ПАПКА (item.type === 'folder') -> можно удалять всегда (в списке папок)
+        let showDelete = false;
+        if (currentState.folderId) showDelete = true;
+        if (item.type === 'folder') showDelete = true;
+
         el.innerHTML = `
             ${content}
             <div class="name">${item.name}</div>
-            ${!currentState.folderId ? '' : `<div class="delete-btn" onclick="deleteItem(event, '${item.id}')"><i class="fas fa-trash"></i></div>`}
+            ${showDelete ? `<div class="delete-btn" onclick="deleteItem(event, '${item.id}')"><i class="fas fa-trash"></i></div>` : ''}
         `;
 
         el.onclick = (e) => {
