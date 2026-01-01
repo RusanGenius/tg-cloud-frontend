@@ -2,13 +2,13 @@ const tg = window.Telegram.WebApp;
 tg.expand(); // Раскрыть на весь экран
 
 // ⚠️ ВАЖНО: Если тестируешь с компа, раскомментируй строку ниже и впиши свой ID руками
-const USER_ID = 5085032008; 
+// const USER_ID = 5085032008; 
 
 // Если открываем внутри Telegram, берем ID оттуда
-// const USER_ID = tg.initDataUnsafe?.user?.id;
+const USER_ID = tg.initDataUnsafe?.user?.id;
 
 // ⚠️ СЮДА ПОТОМ ВСТАВИМ ССЫЛКУ С RENDER (пока локальная)
-const API_URL = "http://127.0.0.1:8000"; 
+const API_URL = "https://my-tg-cloud-api.onrender.com"; 
 
 const grid = document.getElementById('file-grid');
 
