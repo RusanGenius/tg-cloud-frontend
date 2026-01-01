@@ -98,28 +98,54 @@ function renderGrid() {
     });
 }
 
-// 3. Создание папки
-function createFolder() {
-    tg.showPopup({
-        title: 'Новая папка',
-        message: 'Введите имя папки:',
-        buttons: [{type: 'ok', text: 'Создать'}, {type: 'cancel'}]
-    }, (btn) => { // Это колбэк нажатия кнопки, но в WebApp нет ввода текста в попапе :(
-        // Хак: используем prompt браузера, он работает поверх
-        if(btn === 'ok') {
-            // Внимание: стандартный prompt может выглядеть не оч, но работает
-        }
-    });
-    
-    // Используем простой prompt JS
-    const name = prompt("Введите имя папки:");
-    if (!name) return;
+// --- ЛОГИКА МОДАЛЬНОГО ОКНА ---
 
-    fetch(`${API_URL}/api/create_folder`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ user_id: USER_ID, name: name, parent_id: currentFolderId })
-    }).then(() => loadFiles(currentFolderId));
+// 1. Открыть окно
+function createFolder() {
+    const modal = document.getElementById('folder-modal');
+    const input = document.getElementById('folder-input');
+    
+    modal.style.display = 'flex'; // Показываем
+    input.value = ''; // Чистим поле
+    input.focus(); // Ставим курсор сразу в поле
+}
+
+// 2. Закрыть окно
+function closeModal() {
+    document.getElementById('folder-modal').style.display = 'none';
+}
+
+// 3. Отправить данные (создать папку)
+async function submitFolder() {
+    const name = document.getElementById('folder-input').value;
+    
+    if (!name.trim()) {
+        tg.showAlert("Введите название!");
+        return;
+    }
+
+    closeModal(); // Закрываем окно
+    tg.MainButton.showProgress();
+
+    try {
+        await fetch(`${API_URL}/api/create_folder`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                user_id: USER_ID, 
+                name: name, 
+                parent_id: currentFolderId 
+            })
+        });
+        
+        // Обновляем список файлов
+        loadFiles(currentFolderId);
+        
+    } catch (e) {
+        tg.showAlert("Ошибка создания папки");
+    }
+    
+    tg.MainButton.hideProgress();
 }
 
 // 4. Удаление

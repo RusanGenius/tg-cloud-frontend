@@ -38,6 +38,18 @@
         <i class="fas fa-cloud-upload-alt"></i>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО (Скрыто по умолчанию) -->
+    <div id="folder-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Новая папка</h3>
+            <input type="text" id="folder-input" placeholder="Название..." autocomplete="off">
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+                <button class="btn-create" onclick="submitFolder()">Создать</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
