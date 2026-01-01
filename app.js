@@ -31,17 +31,24 @@ function setTab(tabName, el) {
 
 // --- 2. ЗАГРУЗКА ДАННЫХ ---
 async function loadData() {
-    grid.innerHTML = '<div style="color:white; text-align:center; padding:20px;">Загрузка...</div>';
+    grid.innerHTML = '<div style="color:#666; text-align:center; padding:50px;">Загрузка...</div>';
     
     try {
         let url = `${API_URL}/api/files?user_id=${USER_ID}`;
         
-        // Если мы внутри папки - грузим содержимое папки
-        if (currentState.folderId) {
-            url += `&folder_id=${currentState.folderId}`;
+        if (currentState.tab === 'folders') {
+            // РЕЖИМ ПАПОК (СТРОГИЙ)
+            if (currentState.folderId) {
+                // Внутри папки
+                url += `&folder_id=${currentState.folderId}&mode=strict`;
+            } else {
+                // Корень папок
+                url += `&folder_id=null&mode=strict`;
+            }
         } else {
-            // Иначе грузим корень
-            url += `&folder_id=null`;
+            // РЕЖИМ ГАЛЕРЕИ (ГЛОБАЛЬНЫЙ)
+            // Показываем всё, игнорируя папки
+            url += `&mode=global`;
         }
 
         const res = await fetch(url);
@@ -50,7 +57,7 @@ async function loadData() {
         renderGrid();
     } catch (e) {
         console.error(e);
-        grid.innerHTML = '<div style="color:red; text-align:center;">Ошибка сети</div>';
+        grid.innerHTML = '<div style="color:red; text-align:center; padding:50px;">Ошибка сети</div>';
     }
 }
 
@@ -182,7 +189,7 @@ async function openFilePicker() {
     list.innerHTML = 'Загрузка...';
 
     // Загружаем файлы из корня (root)
-    const res = await fetch(`${API_URL}/api/files?user_id=${USER_ID}&source=root`);
+    const res = await fetch(`${API_URL}/api/files?user_id=${USER_ID}&mode=global`);
     const files = await res.json();
 
     list.innerHTML = '';
