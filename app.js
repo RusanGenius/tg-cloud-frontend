@@ -265,7 +265,7 @@ async function downloadFile(item, domElement) {
     // 1. Визуальная анимация
     if(domElement) {
         domElement.classList.add('downloaded');
-        setTimeout(() => domElement.classList.remove('downloaded'), 2000);
+        setTimeout(() => domElement.classList.remove('downloaded'), 700);
     }
     
     // 2. Отправка файла
