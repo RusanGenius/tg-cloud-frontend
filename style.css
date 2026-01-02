@@ -105,27 +105,27 @@ body {
 /* Иконки */
 .folder-icon {
     color: #ffd60a;
-    font-size: 40px;
+    font-size: 35px;
     text-shadow: 0 2px 5px rgba(0,0,0,0.1);
     margin-bottom: auto; 
     margin-top: auto; 
-    padding-bottom: 10px; /* Чуть приподняли от текста */
+    padding-bottom: 6px;
     z-index: 2;
 }
 .file-icon {
-    font-size: 40px;
+    font-size: 35px;
     color: var(--text-secondary);
     margin-bottom: auto; 
     margin-top: auto;
-    padding-bottom: 10px;
+    padding-bottom: 6px;
     z-index: 2; 
 }
 .icon-video {
-    font-size: 40px;
+    font-size: 35px;
     color: var(--text-secondary);
     margin-bottom: auto; 
     margin-top: auto;
-    padding-bottom: 10px;
+    padding-bottom: 6px;
     z-index: 2; 
 }
 .menu-btn { color: var(--text-primary); text-shadow: 0 0 5px rgba(0,0,0,0.5); position: absolute; top: 0; right: 0; padding: 8px; z-index: 10; font-size: 14px; }
