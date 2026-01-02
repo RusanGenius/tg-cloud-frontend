@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Tg Cloud</title>
-    <!-- Подключение Telegram WebApp SDK -->
+    <!-- Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Иконки FontAwesome -->
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Стили -->
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- 1. ХЕДЕР ПРИЛОЖЕНИЯ -->
+    <!-- ХЕДЕР ПРИЛОЖЕНИЯ -->
     <div class="app-header">
-        <!-- Заголовок меняется динамически (JS) -->
         <div class="app-title" id="header-title">
             <i class="fas fa-cloud"></i> Tg Cloud
         </div>
@@ -24,25 +23,29 @@
         </div>
     </div>
 
-    <!-- 2. ВЕРХНЯЯ НАВИГАЦИЯ (Кнопка Назад внутри папок) -->
+    <!-- ВЕРХНЯЯ НАВИГАЦИЯ (Только внутри папок) -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
             <i class="fas fa-chevron-left"></i> <span data-i18n="back">Назад</span>
         </div>
+        <!-- Кнопка "Сохранить всё" -->
+        <div class="nav-action-btn" onclick="downloadAllInFolder()">
+            <span data-i18n="save_all">Сохр. всё</span> <i class="fas fa-download"></i>
+        </div>
     </div>
 
-    <!-- 3. ОСНОВНОЙ КОНТЕКСТ (Сетка файлов + Лоадер) -->
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div style="position: relative; min-height: 100vh;">
-        <!-- Сюда JS генерирует папки и файлы -->
+        <!-- Сетка файлов -->
         <div class="grid" id="file-grid"></div>
         
-        <!-- Спиннер загрузки -->
+        <!-- Лоадер (Спиннер) -->
         <div id="loading-overlay" class="loading-overlay" style="display: none;">
             <div class="spinner"></div>
         </div>
     </div>
 
-    <!-- 4. ЭКРАН НАСТРОЕК (По умолчанию скрыт) -->
+    <!-- ЭКРАН НАСТРОЕК -->
     <div id="settings-view" class="settings-view" style="display: none;">
         <div class="settings-header">
             <h2 data-i18n="settings_title">Настройки</h2>
@@ -63,7 +66,7 @@
                 </div>
             </div>
 
-            <!-- Статистика -->
+            <!-- Сетка статистики -->
             <div class="stats-grid">
                 <div class="stat-item">
                     <i class="fas fa-image" style="color: #34c759;"></i>
@@ -94,7 +97,6 @@
                     <span><span data-i18n="unlimited">Безлимитно</span> ∞</span>
                 </div>
                 <div class="progress-bar">
-                    <!-- Для красоты пока статично 2% -->
                     <div class="progress-fill" style="width: 2%;"></div>
                 </div>
             </div>
@@ -102,19 +104,45 @@
             <!-- Список настроек -->
             <div class="settings-list">
                 
-                <!-- Слайдер Темы -->
+                <!-- 1. Размер сетки -->
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <i class="fas fa-th"></i> <span data-i18n="grid_size">Сетка</span>
+                    </div>
+                    <div class="segmented-control three-options" id="grid-switch">
+                        <div class="segmented-option" onclick="setGridSize(2)" data-val="2">2</div>
+                        <div class="segmented-option" onclick="setGridSize(3)" data-val="3">3</div>
+                        <div class="segmented-option" onclick="setGridSize(4)" data-val="4">4</div>
+                        <div class="segmented-glider" id="grid-glider"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Сортировка -->
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <i class="fas fa-sort-amount-down"></i> <span data-i18n="sort">Сортировка</span>
+                    </div>
+                    <div class="segmented-control three-options" id="sort-switch">
+                        <div class="segmented-option" onclick="setSort('date')" data-val="date"><i class="far fa-clock"></i></div>
+                        <div class="segmented-option" onclick="setSort('name')" data-val="name">A-Z</div>
+                        <div class="segmented-option" onclick="setSort('size')" data-val="size"><i class="fas fa-weight-hanging"></i></div>
+                        <div class="segmented-glider" id="sort-glider"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Тема -->
                 <div class="setting-row">
                     <div class="setting-label">
                         <i class="fas fa-adjust"></i> <span data-i18n="theme">Тема</span>
                     </div>
                     <div class="segmented-control" id="theme-switch">
-                        <div class="segmented-option active" onclick="setTheme('dark')" data-val="dark" data-i18n="theme_dark">Тёмная</div>
+                        <div class="segmented-option" onclick="setTheme('dark')" data-val="dark" data-i18n="theme_dark">Тёмная</div>
                         <div class="segmented-option" onclick="setTheme('light')" data-val="light" data-i18n="theme_light">Светлая</div>
                         <div class="segmented-glider" id="theme-glider"></div>
                     </div>
                 </div>
                 
-                <!-- Слайдер Языка -->
+                <!-- 4. Язык -->
                 <div class="setting-row">
                     <div class="setting-label">
                         <i class="fas fa-globe"></i> <span data-i18n="language">Язык</span>
@@ -126,36 +154,25 @@
                     </div>
                 </div>
 
-                <!-- Кнопка удаления -->
+                <!-- 5. Удалить всё -->
                 <div class="setting-row danger" onclick="actionDeleteAll()">
                     <div class="setting-label">
                         <i class="fas fa-trash-alt"></i> <span data-i18n="delete_all">Удалить все данные</span>
                     </div>
                 </div>
             </div>
-            
+
             <div style="text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 12px;">
-                Tg Cloud v1.0
+                Tg Cloud v2.7
             </div>
         </div>
     </div>
 
-    <!-- 5. ПЛАВАЮЩАЯ КНОПКА (Только для папок) -->
-    <div class="fab-add" id="fab-add" onclick="handleAddClick()">
-        <i class="fas fa-plus"></i>
-    </div>
-
-    <!-- 6. НИЖНЯЯ ПАНЕЛЬ ТАБОВ -->
-    <div class="bottom-bar">
-        <i class="nav-item fas fa-home active" onclick="setTab('all', this)"></i> 
-        <i class="nav-item fas fa-image" onclick="setTab('image', this)"></i>
-        <i class="nav-item fas fa-video" onclick="setTab('video', this)"></i>
-        <i class="nav-item fas fa-file-alt" onclick="setTab('doc', this)"></i>
-        <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i>
-    </div>
-
-    <!-- 7. КОНТЕКСТНОЕ МЕНЮ (3 точки) -->
+    <!-- КОНТЕКСТНОЕ МЕНЮ -->
     <div id="context-menu" class="context-menu" style="display: none;">
+        <div class="context-item" onclick="actionInfo()">
+            <i class="fas fa-info-circle"></i> <span data-i18n="action_info">Инфо</span>
+        </div>
         <div class="context-item" onclick="actionShare()">
             <i class="fas fa-share-alt"></i> <span data-i18n="action_share">Поделиться</span>
         </div>
@@ -165,7 +182,6 @@
         <div class="context-item" onclick="actionRename()">
             <i class="fas fa-edit"></i> <span data-i18n="action_rename">Переименовать</span>
         </div>
-        <!-- Кнопка "Убрать" видна только внутри папки -->
         <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;">
             <i class="fas fa-folder-minus"></i> <span data-i18n="action_remove">Убрать</span>
         </div>
@@ -173,16 +189,41 @@
             <i class="fas fa-trash"></i> <span data-i18n="action_delete">Удалить</span>
         </div>
     </div>
-    <!-- Подложка для закрытия меню по клику вне -->
     <div id="menu-overlay" class="menu-overlay" onclick="closeContextMenu()" style="display: none;"></div>
 
-    <!-- 8. МОДАЛЬНЫЕ ОКНА -->
-    
-    <!-- Создание папки -->
+    <!-- МОДАЛКА: ИНФОРМАЦИЯ -->
+    <div id="modal-info" class="modal-overlay">
+        <div class="modal-box">
+            <h3 data-i18n="file_info">Информация</h3>
+            <table class="info-table">
+                <tr>
+                    <td class="info-label" data-i18n="info_name">Имя</td>
+                    <td class="info-value" id="info-name"></td>
+                </tr>
+                <tr>
+                    <td class="info-label" data-i18n="info_type">Тип</td>
+                    <td class="info-value" id="info-type"></td>
+                </tr>
+                <tr>
+                    <td class="info-label" data-i18n="info_size">Размер</td>
+                    <td class="info-value" id="info-size"></td>
+                </tr>
+                <tr>
+                    <td class="info-label" data-i18n="info_date">Дата</td>
+                    <td class="info-value" id="info-date"></td>
+                </tr>
+            </table>
+            <div class="modal-buttons" style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="closeModals()" data-i18n="btn_close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА: СОЗДАНИЕ ПАПКИ -->
     <div id="modal-create-folder" class="modal-overlay">
         <div class="modal-box">
             <h3 data-i18n="modal_new_folder">Новая папка</h3>
-            <input type="text" class="modal-input" id="folder-input">
+            <input type="text" class="modal-input" id="folder-input" placeholder="...">
             <div class="modal-buttons">
                 <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
                 <button class="btn btn-primary" onclick="submitCreateFolder()" data-i18n="btn_create">Создать</button>
@@ -190,10 +231,10 @@
         </div>
     </div>
 
-    <!-- Выбор файлов для добавления (Пикер) -->
+    <!-- МОДАЛКА: ДОБАВЛЕНИЕ ФАЙЛОВ -->
     <div id="modal-add-files" class="modal-overlay">
         <div class="modal-box">
-            <h3 data-i18n="modal_add_files">Добавить</h3>
+            <h3 data-i18n="modal_add_files">Добавить в папку</h3>
             <div class="modal-list" id="picker-list">Загрузка...</div>
             <div class="modal-buttons">
                 <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
@@ -202,10 +243,10 @@
         </div>
     </div>
 
-    <!-- Выбор папки для перемещения -->
+    <!-- МОДАЛКА: ВЫБОР ПАПКИ (ПЕРЕМЕЩЕНИЕ) -->
     <div id="modal-select-folder" class="modal-overlay">
         <div class="modal-box">
-            <h3 data-i18n="modal_move_to">Куда переместить?</h3>
+            <h3 data-i18n="modal_move_to">Переместить в...</h3>
             <div class="modal-list" id="folder-list">Загрузка...</div>
             <div class="modal-buttons">
                 <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
@@ -213,7 +254,21 @@
         </div>
     </div>
 
-    <!-- Логика приложения -->
+    <!-- FAB: КНОПКА ПЛЮС -->
+    <div class="fab-add" id="fab-add" onclick="handleAddClick()">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ -->
+    <div class="bottom-bar">
+        <i class="nav-item fas fa-home active" onclick="setTab('all', this)"></i> 
+        <i class="nav-item fas fa-image" onclick="setTab('image', this)"></i>
+        <i class="nav-item fas fa-video" onclick="setTab('video', this)"></i>
+        <i class="nav-item fas fa-file-alt" onclick="setTab('doc', this)"></i>
+        <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i>
+    </div>
+
+    <!-- СКРИПТ ПРИЛОЖЕНИЯ -->
     <script src="app.js"></script>
 </body>
 </html>
