@@ -133,12 +133,26 @@ function updateHeaderTitle() {
 // --- SETTINGS VIEW ---
 async function openSettings() {
     document.getElementById('settings-view').style.display = 'flex';
+    
+    // Обновляем положение слайдеров
     updateSlider('theme-switch', 'theme-glider', currentTheme);
     updateSlider('lang-switch', 'lang-glider', currentLang);
     updateSlider('grid-switch', 'grid-glider', currentGrid.toString());
     updateSlider('sort-switch', 'sort-glider', currentSort);
     
-    // Статистика
+    // --- ВОТ ЭТОТ БЛОК НУЖНО БЫЛО ВЕРНУТЬ ---
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+        document.getElementById('profile-name').innerText = (user.first_name + ' ' + (user.last_name || '')).trim();
+        document.getElementById('profile-username').innerText = user.username ? '@' + user.username : 'ID: ' + user.id;
+        
+        if (user.first_name) {
+            document.getElementById('profile-avatar').innerText = user.first_name[0];
+        }
+    }
+    // ----------------------------------------
+    
+    // Статистика с сервера
     try {
         const res = await fetch(`${API_URL}/api/profile?user_id=${USER_ID}`);
         const stats = await res.json();
