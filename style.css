@@ -244,13 +244,18 @@ body {
     color: var(--text-primary);
 }
 
-/* Бегающая плашка */
+/* Глайдер - бегающая плашка */
 .segmented-glider {
     position: absolute;
-    top: 2px; bottom: 2px;
-    width: 50%; /* Для 2-х опций */
-    background: var(--modal-bg); /* Цвет плашки */
-    border: 0.5px solid rgba(0,0,0,0.04);
+    top: 2px; 
+    bottom: 2px;
+    left: 2px; /* Добавили явный отступ слева */
+    
+    /* ИЗМЕНЕНИЕ: Ширина 50% минус 4px (2px отступ слева + 2px отступ справа) */
+    width: calc(50% - 4px); 
+    
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
     box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     border-radius: 6px;
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
