@@ -30,7 +30,7 @@ const translations = {
         theme_light: "Светлая",
         language: "Язык",
         delete_all: "Удалить все данные",
-        delete_all_confirm: "ВЫ УВЕРЕНЫ? Это удалит ВСЕ ваши файлы и папки безвозвратно.",
+        delete_all_confirm: "Вы уверены? Это удалит ВСЕ ваши файлы безвозвратно!",
         action_share: "Поделиться",
         action_move: "В папку",
         action_rename: "Переименовать",
@@ -45,19 +45,19 @@ const translations = {
         new_folder_btn: "Новая папка",
         prompt_rename: "Введите новое имя:",
         prompt_folder_name: "Название новой папки:",
-        alert_share_folder: "Папкой нельзя поделиться",
+        alert_share_folder: "Папкой пока нельзя поделиться",
         alert_copied: "Ссылка скопирована!",
         alert_error: "Ошибка",
         confirm_delete: "Удалить навсегда?",
         sent: "Отправлено в чат!",
-        root: "Главная (Корень)",
+        root: "Главная",
         no_files_picker: "Нет свободных файлов.",
         tab_all: "Все файлы",
-        tab_image: "Фотопленка",
+        tab_image: "Фото",
         tab_video: "Видео",
         tab_doc: "Документы",
-        tab_folders: "Мои папки",
-        app_title: "Tg Cloud"
+        tab_folders: "Папки",
+        app_title: "Telegram Cloud"
     },
     en: {
         loading: "Loading...",
@@ -75,7 +75,7 @@ const translations = {
         theme_light: "Light",
         language: "Language",
         delete_all: "Delete All Data",
-        delete_all_confirm: "ARE YOU SURE? This will delete ALL your files and folders permanently.",
+        delete_all_confirm: "Are you sure? This will delete ALL your files permanently!",
         action_share: "Share",
         action_move: "Move to folder",
         action_rename: "Rename",
@@ -102,7 +102,7 @@ const translations = {
         tab_video: "Videos",
         tab_doc: "Documents",
         tab_folders: "Folders",
-        app_title: "Tg Cloud"
+        app_title: "Telegram Cloud"
     }
 };
 
