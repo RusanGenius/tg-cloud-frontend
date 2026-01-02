@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cloud</title>
+    <title>Tg Cloud</title>
+    <!-- Подключение Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Иконки FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Стили -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ХЕДЕР -->
+    <!-- 1. ХЕДЕР ПРИЛОЖЕНИЯ -->
     <div class="app-header">
+        <!-- Заголовок меняется динамически (JS) -->
         <div class="app-title" id="header-title">
             <i class="fas fa-cloud"></i> Tg Cloud
         </div>
@@ -20,21 +24,25 @@
         </div>
     </div>
 
-    <!-- НАВИГАЦИЯ В ПАПКАХ -->
+    <!-- 2. ВЕРХНЯЯ НАВИГАЦИЯ (Кнопка Назад внутри папок) -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
             <i class="fas fa-chevron-left"></i> <span data-i18n="back">Назад</span>
         </div>
     </div>
 
+    <!-- 3. ОСНОВНОЙ КОНТЕКСТ (Сетка файлов + Лоадер) -->
     <div style="position: relative; min-height: 100vh;">
+        <!-- Сюда JS генерирует папки и файлы -->
         <div class="grid" id="file-grid"></div>
+        
+        <!-- Спиннер загрузки -->
         <div id="loading-overlay" class="loading-overlay" style="display: none;">
             <div class="spinner"></div>
         </div>
     </div>
 
-    <!-- НАСТРОЙКИ -->
+    <!-- 4. ЭКРАН НАСТРОЕК (По умолчанию скрыт) -->
     <div id="settings-view" class="settings-view" style="display: none;">
         <div class="settings-header">
             <h2 data-i18n="settings_title">Настройки</h2>
@@ -44,10 +52,13 @@
         </div>
 
         <div class="settings-content">
+            <!-- Карточка профиля -->
             <div class="profile-card">
-                <div class="profile-avatar" id="profile-avatar"><i class="fas fa-user"></i></div>
+                <div class="profile-avatar" id="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
                 <div class="profile-info">
-                    <h3 id="profile-name">...</h3>
+                    <h3 id="profile-name">Загрузка...</h3>
                     <p id="profile-username">@...</p>
                 </div>
             </div>
@@ -76,37 +87,38 @@
                 </div>
             </div>
 
+            <!-- Хранилище -->
             <div class="storage-section">
                 <div class="storage-labels">
                     <span><span data-i18n="used">Использовано</span>: <b id="storage-used">0 MB</b></span>
                     <span><span data-i18n="unlimited">Безлимитно</span> ∞</span>
                 </div>
                 <div class="progress-bar">
+                    <!-- Для красоты пока статично 2% -->
                     <div class="progress-fill" style="width: 2%;"></div>
                 </div>
             </div>
 
+            <!-- Список настроек -->
             <div class="settings-list">
                 
-                <!-- 1. СМЕНА ТЕМЫ (СЛАЙДЕР) -->
+                <!-- Слайдер Темы -->
                 <div class="setting-row">
                     <div class="setting-label">
                         <i class="fas fa-adjust"></i> <span data-i18n="theme">Тема</span>
                     </div>
-                    
                     <div class="segmented-control" id="theme-switch">
                         <div class="segmented-option active" onclick="setTheme('dark')" data-val="dark" data-i18n="theme_dark">Тёмная</div>
                         <div class="segmented-option" onclick="setTheme('light')" data-val="light" data-i18n="theme_light">Светлая</div>
-                        <div class="segmented-glider" id="theme-glider" style="transform: translateX(0%);"></div>
+                        <div class="segmented-glider" id="theme-glider"></div>
                     </div>
                 </div>
                 
-                <!-- 2. СМЕНА ЯЗЫКА (СЛАЙДЕР) -->
+                <!-- Слайдер Языка -->
                 <div class="setting-row">
                     <div class="setting-label">
                         <i class="fas fa-globe"></i> <span data-i18n="language">Язык</span>
                     </div>
-
                     <div class="segmented-control" id="lang-switch">
                         <div class="segmented-option" onclick="changeLanguage('ru')" data-val="ru">RU</div>
                         <div class="segmented-option" onclick="changeLanguage('en')" data-val="en">EN</div>
@@ -114,23 +126,26 @@
                     </div>
                 </div>
 
+                <!-- Кнопка удаления -->
                 <div class="setting-row danger" onclick="actionDeleteAll()">
                     <div class="setting-label">
-                        <i class="fas fa-trash-alt"></i> <span data-i18n="delete_all">Удалить всё</span>
+                        <i class="fas fa-trash-alt"></i> <span data-i18n="delete_all">Удалить все данные</span>
                     </div>
                 </div>
             </div>
             
-            <div style="text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 12px;">Tg Cloud v2.6 UI Update</div>
+            <div style="text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 12px;">
+                Tg Cloud v2.6
+            </div>
         </div>
     </div>
 
-    <!-- FAB BUTTON -->
+    <!-- 5. ПЛАВАЮЩАЯ КНОПКА (Только для папок) -->
     <div class="fab-add" id="fab-add" onclick="handleAddClick()">
         <i class="fas fa-plus"></i>
     </div>
 
-    <!-- BOTTOM BAR -->
+    <!-- 6. НИЖНЯЯ ПАНЕЛЬ ТАБОВ -->
     <div class="bottom-bar">
         <i class="nav-item fas fa-home active" onclick="setTab('all', this)"></i> 
         <i class="nav-item fas fa-image" onclick="setTab('image', this)"></i>
@@ -139,27 +154,66 @@
         <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i>
     </div>
 
-    <!-- CONTEXT MENU & MODALS (Без изменений структуры) -->
+    <!-- 7. КОНТЕКСТНОЕ МЕНЮ (3 точки) -->
     <div id="context-menu" class="context-menu" style="display: none;">
-        <div class="context-item" onclick="actionShare()"><i class="fas fa-share-alt"></i> <span data-i18n="action_share">Поделиться</span></div>
-        <div class="context-item" onclick="actionMove()"><i class="fas fa-folder-open"></i> <span data-i18n="action_move">В папку</span></div>
-        <div class="context-item" onclick="actionRename()"><i class="fas fa-edit"></i> <span data-i18n="action_rename">Переименовать</span></div>
-        <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;"><i class="fas fa-folder-minus"></i> <span data-i18n="action_remove">Убрать</span></div>
-        <div class="context-item delete" onclick="actionDelete()"><i class="fas fa-trash"></i> <span data-i18n="action_delete">Удалить</span></div>
+        <div class="context-item" onclick="actionShare()">
+            <i class="fas fa-share-alt"></i> <span data-i18n="action_share">Поделиться</span>
+        </div>
+        <div class="context-item" onclick="actionMove()">
+            <i class="fas fa-folder-open"></i> <span data-i18n="action_move">В папку</span>
+        </div>
+        <div class="context-item" onclick="actionRename()">
+            <i class="fas fa-edit"></i> <span data-i18n="action_rename">Переименовать</span>
+        </div>
+        <!-- Кнопка "Убрать" видна только внутри папки -->
+        <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;">
+            <i class="fas fa-folder-minus"></i> <span data-i18n="action_remove">Убрать</span>
+        </div>
+        <div class="context-item delete" onclick="actionDelete()">
+            <i class="fas fa-trash"></i> <span data-i18n="action_delete">Удалить</span>
+        </div>
     </div>
+    <!-- Подложка для закрытия меню по клику вне -->
     <div id="menu-overlay" class="menu-overlay" onclick="closeContextMenu()" style="display: none;"></div>
+
+    <!-- 8. МОДАЛЬНЫЕ ОКНА -->
     
-    <!-- Modals... (код тот же, сокращен для чтения) -->
+    <!-- Создание папки -->
     <div id="modal-create-folder" class="modal-overlay">
-        <div class="modal-box"><h3 data-i18n="modal_new_folder">Новая папка</h3><input type="text" class="modal-input" id="folder-input"><div class="modal-buttons"><button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button><button class="btn btn-primary" onclick="submitCreateFolder()" data-i18n="btn_create">Создать</button></div></div>
-    </div>
-    <div id="modal-add-files" class="modal-overlay">
-        <div class="modal-box"><h3 data-i18n="modal_add_files">Добавить</h3><div class="modal-list" id="picker-list"></div><div class="modal-buttons"><button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button><button class="btn btn-primary" onclick="submitMoveFiles()" data-i18n="btn_add">Добавить</button></div></div>
-    </div>
-    <div id="modal-select-folder" class="modal-overlay">
-        <div class="modal-box"><h3 data-i18n="modal_move_to">Куда?</h3><div class="modal-list" id="folder-list"></div><div class="modal-buttons"><button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button></div></div>
+        <div class="modal-box">
+            <h3 data-i18n="modal_new_folder">Новая папка</h3>
+            <input type="text" class="modal-input" id="folder-input">
+            <div class="modal-buttons">
+                <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
+                <button class="btn btn-primary" onclick="submitCreateFolder()" data-i18n="btn_create">Создать</button>
+            </div>
+        </div>
     </div>
 
+    <!-- Выбор файлов для добавления (Пикер) -->
+    <div id="modal-add-files" class="modal-overlay">
+        <div class="modal-box">
+            <h3 data-i18n="modal_add_files">Добавить</h3>
+            <div class="modal-list" id="picker-list">Загрузка...</div>
+            <div class="modal-buttons">
+                <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
+                <button class="btn btn-primary" onclick="submitMoveFiles()" data-i18n="btn_add">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Выбор папки для перемещения -->
+    <div id="modal-select-folder" class="modal-overlay">
+        <div class="modal-box">
+            <h3 data-i18n="modal_move_to">Куда переместить?</h3>
+            <div class="modal-list" id="folder-list">Загрузка...</div>
+            <div class="modal-buttons">
+                <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Логика приложения -->
     <script src="app.js"></script>
 </body>
 </html>
