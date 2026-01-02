@@ -11,7 +11,8 @@
     --modal-bg: #151515;
     --modal-border: #333;
     --input-bg: #222;
-    --glider-bg: #141414; 
+    --glider-bg: #141414;
+    --save-bg: rgba(47, 128, 41, 0.6);
 }
 
 /* --- СВЕТЛАЯ ТЕМА --- */
@@ -27,7 +28,8 @@
     --modal-bg: #ffffff;
     --modal-border: #e5e5ea;
     --input-bg: #ffffff;
-    --glider-bg: #ffffff; 
+    --glider-bg: #ffffff;
+    --save-bg: rgba(76, 204, 67, 0.6);
 }
 
 body {
@@ -140,7 +142,7 @@ body {
 /* --- АНИМАЦИЯ СКАЧИВАНИЯ (ЗЕЛЕНАЯ ГАЛОЧКА) --- */
 .success-overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(47, 128, 41, 0.6); /* Зеленый */
+    background: var(--save-bg);
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 30px;
     opacity: 0; transition: opacity 0.3s ease;
