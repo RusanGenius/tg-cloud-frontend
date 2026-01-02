@@ -140,7 +140,7 @@ body {
 /* --- АНИМАЦИЯ СКАЧИВАНИЯ (ЗЕЛЕНАЯ ГАЛОЧКА) --- */
 .success-overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(46, 204, 113, 0.9); /* Зеленый */
+    background: rgba(47, 128, 41, 0.6); /* Зеленый */
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 30px;
     opacity: 0; transition: opacity 0.3s ease;
