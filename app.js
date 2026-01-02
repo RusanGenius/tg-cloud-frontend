@@ -1,6 +1,5 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-// УБРАНО: tg.enableClosingConfirmation(); - теперь закрывается без вопросов
 
 const API_URL = "https://my-tg-cloud-api.onrender.com";
 const USER_ID = tg.initDataUnsafe?.user?.id;
@@ -22,6 +21,42 @@ const contextMenu = document.getElementById('context-menu');
 const menuOverlay = document.getElementById('menu-overlay');
 const btnRemoveFolder = document.getElementById('btn-remove-from-folder');
 
+// --- 0. НАСТРОЙКИ ---
+async function openSettings() {
+    document.getElementById('settings-view').style.display = 'flex';
+    
+    // Заполняем профиль данными из Telegram
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+        document.getElementById('profile-name').innerText = (user.first_name + ' ' + (user.last_name || '')).trim();
+        document.getElementById('profile-username').innerText = user.username ? '@' + user.username : 'ID: ' + user.id;
+        
+        // Фото профиля (если есть url - сложно получить без прокси, поэтому пока просто иконка/инициалы)
+        if (user.first_name) {
+            document.getElementById('profile-avatar').innerText = user.first_name[0];
+        }
+    }
+
+    // Загружаем статистику с сервера
+    try {
+        const res = await fetch(`${API_URL}/api/profile?user_id=${USER_ID}`);
+        const stats = await res.json();
+        
+        document.getElementById('stat-photos').innerText = stats.counts.photos;
+        document.getElementById('stat-videos').innerText = stats.counts.videos;
+        document.getElementById('stat-docs').innerText = stats.counts.docs;
+        document.getElementById('stat-folders').innerText = stats.counts.folders;
+        
+        document.getElementById('storage-used').innerText = stats.total_size_mb + ' MB';
+    } catch (e) {
+        console.error("Stats load error", e);
+    }
+}
+
+function closeSettings() {
+    document.getElementById('settings-view').style.display = 'none';
+}
+
 // --- 1. ТАБЫ И ЗАГРУЗКА ---
 function setTab(tabName, el) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -38,7 +73,6 @@ async function loadData() {
     try {
         let url = `${API_URL}/api/files?user_id=${USER_ID}`;
         if (currentState.tab === 'folders') {
-            // Strict mode для папок
             url += currentState.folderId ? `&folder_id=${currentState.folderId}&mode=strict` : `&folder_id=null&mode=strict`;
         } else {
             url += `&mode=global`;
@@ -134,7 +168,7 @@ function closeContextMenu() {
     currentState.contextItem = null;
 }
 
-// --- 4. ДЕЙСТВИЯ МЕНЮ ---
+// --- 4. ДЕЙСТВИЯ ---
 
 function actionShare() {
     const item = currentState.contextItem;
@@ -162,27 +196,19 @@ async function actionRemoveFromFolder() {
     performMove(item.id, null);
 }
 
-// ПЕРЕИМЕНОВАНИЕ
 async function actionRename() {
     const item = currentState.contextItem;
     closeContextMenu();
-    
     let oldName = item.name;
     let extension = '';
-    
-    // Если это файл, отделяем расширение
     if (item.type !== 'folder' && oldName.includes('.')) {
         const parts = oldName.split('.');
-        extension = '.' + parts.pop(); // забираем последнее как расширение
-        oldName = parts.join('.'); // остальное - имя
+        extension = '.' + parts.pop();
+        oldName = parts.join('.');
     }
-
-    // Системный промпт (просто и надежно)
     let newName = prompt("Введите новое имя:", oldName);
-    
     if (newName && newName !== oldName) {
-        let finalName = newName + extension; // Приклеиваем расширение обратно
-        
+        let finalName = newName + extension;
         tg.MainButton.showProgress();
         await fetch(`${API_URL}/api/rename`, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -193,11 +219,9 @@ async function actionRename() {
     }
 }
 
-// ПЕРЕМЕЩЕНИЕ (С НОВОЙ КНОПКОЙ "СОЗДАТЬ ПАПКУ")
 async function actionMove() {
     const item = currentState.contextItem;
     closeContextMenu();
-    
     const modal = document.getElementById('modal-select-folder');
     const list = document.getElementById('folder-list');
     modal.style.display = 'flex';
@@ -207,8 +231,6 @@ async function actionMove() {
     const folders = await res.json();
 
     list.innerHTML = '';
-    
-    // 1. Кнопка "Создать папку" (ВМЕСТО КОРНЯ)
     const createItem = document.createElement('div');
     createItem.className = 'modal-item';
     createItem.style.color = 'var(--accent)';
@@ -216,7 +238,6 @@ async function actionMove() {
     createItem.onclick = () => createFolderInsidePicker(item.id);
     list.appendChild(createItem);
 
-    // 2. Список существующих папок
     const validFolders = folders.filter(f => f.id !== item.id);
     validFolders.forEach(f => {
         const div = document.createElement('div');
@@ -227,20 +248,13 @@ async function actionMove() {
     });
 }
 
-// Создание папки прямо из меню перемещения
 async function createFolderInsidePicker(fileToMoveId) {
     let name = prompt("Название новой папки:");
     if (!name) return;
-    
-    // Создаем папку в КОРНЕ (parent_id = null), чтобы в неё можно было переместить
-    // (Или можно усложнить и создавать там же, где мы сейчас, но обычно при перемещении ищут новую цель)
     await fetch(`${API_URL}/api/create_folder`, {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ user_id: USER_ID, name: name, parent_id: null })
     });
-    
-    // Обновляем список папок в модалке (рекурсивный вызов, но имитируем клик по Move)
-    // Трюк: восстанавливаем контекст
     currentState.contextItem = { id: fileToMoveId };
     actionMove(); 
 }
@@ -264,8 +278,6 @@ function openFolder(id) {
 }
 
 function goBack() {
-    // Поднимаемся на уровень выше? Пока просто в корень/назад в историю
-    // Для полноценной навигации нужно хранить историю parent_id, но пока просто сброс:
     currentState.folderId = null;
     updateUI();
     loadData();
@@ -273,8 +285,6 @@ function goBack() {
 
 function handleAddClick() {
     if (currentState.tab === 'folders') {
-        // Создаем папку. ЕСЛИ мы внутри папки, передаем её ID, иначе создаем в корне.
-        // Раньше была проверка !currentState.folderId, теперь разрешаем везде.
         document.getElementById('modal-create-folder').style.display = 'flex';
         document.getElementById('folder-input').focus();
     }
@@ -284,8 +294,6 @@ async function submitCreateFolder() {
     const name = document.getElementById('folder-input').value;
     if(!name) return;
     closeModals();
-    
-    // ИСПРАВЛЕНИЕ: Передаем текущий folderId как родителя. Если null - будет корень.
     await fetch(`${API_URL}/api/create_folder`, {
         method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ user_id: USER_ID, name: name, parent_id: currentState.folderId })
@@ -293,9 +301,7 @@ async function submitCreateFolder() {
     loadData();
 }
 
-// --- Остальные утилиты без изменений ---
 async function openFilePicker() {
-    // ... (код пикера файлов тот же, что был)
     const modal = document.getElementById('modal-add-files');
     const list = document.getElementById('picker-list');
     modal.style.display = 'flex';

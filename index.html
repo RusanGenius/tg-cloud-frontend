@@ -10,12 +10,22 @@
 </head>
 <body>
 
+    <!-- НОВЫЙ ХЕДЕР ПРИЛОЖЕНИЯ -->
+    <div class="app-header">
+        <div class="app-title"><i class="fas fa-cloud"></i> Tg Cloud</div>
+        <div class="settings-btn" onclick="openSettings()">
+            <i class="fas fa-cog"></i>
+        </div>
+    </div>
+
+    <!-- Верхняя навигация (внутри папок) -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
             <i class="fas fa-chevron-left"></i> Назад
         </div>
     </div>
 
+    <!-- Основной контент -->
     <div style="position: relative; min-height: 100vh;">
         <div class="grid" id="file-grid"></div>
         <div id="loading-overlay" class="loading-overlay" style="display: none;">
@@ -23,6 +33,100 @@
         </div>
     </div>
 
+    <!-- СТРАНИЦА НАСТРОЕК (НОВАЯ) -->
+    <div id="settings-view" class="settings-view" style="display: none;">
+        <!-- Хедер настроек -->
+        <div class="settings-header">
+            <h2>Настройки</h2>
+            <div class="close-settings" onclick="closeSettings()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+
+        <div class="settings-content">
+            <!-- Профиль -->
+            <div class="profile-card">
+                <div class="profile-avatar" id="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <h3 id="profile-name">Загрузка...</h3>
+                    <p id="profile-username">@...</p>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <i class="fas fa-image" style="color: #34c759;"></i>
+                    <span id="stat-photos">0</span>
+                    <small>Фото</small>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-video" style="color: #007aff;"></i>
+                    <span id="stat-videos">0</span>
+                    <small>Видео</small>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-file-alt" style="color: #ff9f0a;"></i>
+                    <span id="stat-docs">0</span>
+                    <small>Файлы</small>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-folder" style="color: #ffd60a;"></i>
+                    <span id="stat-folders">0</span>
+                    <small>Папки</small>
+                </div>
+            </div>
+
+            <!-- Хранилище -->
+            <div class="storage-section">
+                <div class="storage-labels">
+                    <span>Использовано: <b id="storage-used">0 MB</b></span>
+                    <span>Безлимитно ∞</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 2%;"></div>
+                </div>
+                <p class="promo-text">✨ Pro-подписка скоро доступна</p>
+            </div>
+
+            <!-- Список опций -->
+            <div class="settings-list">
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <i class="fas fa-moon"></i> Темная тема
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked disabled>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <i class="fas fa-globe"></i> Язык
+                    </div>
+                    <select class="setting-select" disabled>
+                        <option>Русский</option>
+                        <option>English</option>
+                    </select>
+                </div>
+
+                <div class="setting-row danger" onclick="alert('Функция пока недоступна')">
+                    <div class="setting-label">
+                        <i class="fas fa-trash-alt"></i> Удалить все данные
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; color: #555; margin-top: 30px; font-size: 12px;">
+                Tg Cloud v2.4 Alpha
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопки и модалки остались без изменений -->
     <div class="fab-add" id="fab-add" onclick="handleAddClick()">
         <i class="fas fa-plus"></i>
     </div>
@@ -35,30 +139,13 @@
         <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i>
     </div>
 
-    <!-- Глобальное Контекстное Меню -->
     <div id="context-menu" class="context-menu" style="display: none;">
-        <div class="context-item" onclick="actionShare()">
-            <i class="fas fa-share-alt"></i> Поделиться
-        </div>
-        
-        <div class="context-item" onclick="actionMove()">
-            <i class="fas fa-folder-open"></i> В папку
-        </div>
-        
-        <!-- НОВАЯ КНОПКА: Переименовать -->
-        <div class="context-item" onclick="actionRename()">
-            <i class="fas fa-edit"></i> Переименовать
-        </div>
-
-        <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;">
-            <i class="fas fa-folder-minus"></i> Убрать
-        </div>
-
-        <div class="context-item delete" onclick="actionDelete()">
-            <i class="fas fa-trash"></i> Удалить
-        </div>
+        <div class="context-item" onclick="actionShare()"><i class="fas fa-share-alt"></i> Поделиться</div>
+        <div class="context-item" onclick="actionMove()"><i class="fas fa-folder-open"></i> В папку</div>
+        <div class="context-item" onclick="actionRename()"><i class="fas fa-edit"></i> Переименовать</div>
+        <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;"><i class="fas fa-folder-minus"></i> Убрать</div>
+        <div class="context-item delete" onclick="actionDelete()"><i class="fas fa-trash"></i> Удалить</div>
     </div>
-    
     <div id="menu-overlay" class="menu-overlay" onclick="closeContextMenu()" style="display: none;"></div>
 
     <div id="modal-create-folder" class="modal-overlay">
