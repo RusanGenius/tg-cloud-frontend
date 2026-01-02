@@ -44,8 +44,12 @@
         <div class="context-item" onclick="actionMove()">
             <i class="fas fa-folder-open"></i> В папку
         </div>
+        
+        <!-- НОВАЯ КНОПКА: Переименовать -->
+        <div class="context-item" onclick="actionRename()">
+            <i class="fas fa-edit"></i> Переименовать
+        </div>
 
-        <!-- НОВАЯ КНОПКА: Убрать из папки (Скрыта по умолчанию) -->
         <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;">
             <i class="fas fa-folder-minus"></i> Убрать
         </div>
@@ -57,7 +61,6 @@
     
     <div id="menu-overlay" class="menu-overlay" onclick="closeContextMenu()" style="display: none;"></div>
 
-    <!-- Модалки те же -->
     <div id="modal-create-folder" class="modal-overlay">
         <div class="modal-box">
             <h3>Новая папка</h3>
