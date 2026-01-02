@@ -10,7 +10,6 @@
 </head>
 <body>
 
-    <!-- НОВЫЙ ХЕДЕР ПРИЛОЖЕНИЯ -->
     <div class="app-header">
         <div class="app-title"><i class="fas fa-cloud"></i> Tg Cloud</div>
         <div class="settings-btn" onclick="openSettings()">
@@ -18,14 +17,12 @@
         </div>
     </div>
 
-    <!-- Верхняя навигация (внутри папок) -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
-            <i class="fas fa-chevron-left"></i> Назад
+            <i class="fas fa-chevron-left"></i> <span data-i18n="back">Назад</span>
         </div>
     </div>
 
-    <!-- Основной контент -->
     <div style="position: relative; min-height: 100vh;">
         <div class="grid" id="file-grid"></div>
         <div id="loading-overlay" class="loading-overlay" style="display: none;">
@@ -33,69 +30,62 @@
         </div>
     </div>
 
-    <!-- СТРАНИЦА НАСТРОЕК (НОВАЯ) -->
+    <!-- СТРАНИЦА НАСТРОЕК -->
     <div id="settings-view" class="settings-view" style="display: none;">
-        <!-- Хедер настроек -->
         <div class="settings-header">
-            <h2>Настройки</h2>
+            <h2 data-i18n="settings_title">Настройки</h2>
             <div class="close-settings" onclick="closeSettings()">
                 <i class="fas fa-times"></i>
             </div>
         </div>
 
         <div class="settings-content">
-            <!-- Профиль -->
             <div class="profile-card">
-                <div class="profile-avatar" id="profile-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
+                <div class="profile-avatar" id="profile-avatar"><i class="fas fa-user"></i></div>
                 <div class="profile-info">
-                    <h3 id="profile-name">Загрузка...</h3>
+                    <h3 id="profile-name">...</h3>
                     <p id="profile-username">@...</p>
                 </div>
             </div>
 
-            <!-- Статистика -->
             <div class="stats-grid">
                 <div class="stat-item">
                     <i class="fas fa-image" style="color: #34c759;"></i>
                     <span id="stat-photos">0</span>
-                    <small>Фото</small>
+                    <small data-i18n="stat_photos">Фото</small>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-video" style="color: #007aff;"></i>
                     <span id="stat-videos">0</span>
-                    <small>Видео</small>
+                    <small data-i18n="stat_videos">Видео</small>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-file-alt" style="color: #ff9f0a;"></i>
                     <span id="stat-docs">0</span>
-                    <small>Файлы</small>
+                    <small data-i18n="stat_files">Файлы</small>
                 </div>
                 <div class="stat-item">
                     <i class="fas fa-folder" style="color: #ffd60a;"></i>
                     <span id="stat-folders">0</span>
-                    <small>Папки</small>
+                    <small data-i18n="stat_folders">Папки</small>
                 </div>
             </div>
 
-            <!-- Хранилище -->
             <div class="storage-section">
                 <div class="storage-labels">
-                    <span>Использовано: <b id="storage-used">0 MB</b></span>
-                    <span>Безлимитно ∞</span>
+                    <span><span data-i18n="used">Использовано</span>: <b id="storage-used">0 MB</b></span>
+                    <span><span data-i18n="unlimited">Безлимитно</span> ∞</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: 2%;"></div>
                 </div>
-                <p class="promo-text">✨ Pro-подписка скоро доступна</p>
+                <p class="promo-text" data-i18n="promo">✨ Pro-подписка скоро доступна</p>
             </div>
 
-            <!-- Список опций -->
             <div class="settings-list">
                 <div class="setting-row">
                     <div class="setting-label">
-                        <i class="fas fa-moon"></i> Темная тема
+                        <i class="fas fa-moon"></i> <span data-i18n="dark_theme">Темная тема</span>
                     </div>
                     <label class="switch">
                         <input type="checkbox" checked disabled>
@@ -105,28 +95,27 @@
                 
                 <div class="setting-row">
                     <div class="setting-label">
-                        <i class="fas fa-globe"></i> Язык
+                        <i class="fas fa-globe"></i> <span data-i18n="language">Язык</span>
                     </div>
-                    <select class="setting-select" disabled>
-                        <option>Русский</option>
-                        <option>English</option>
+                    <!-- Теперь селект работает -->
+                    <select class="setting-select" id="lang-select" onchange="changeLanguage(this.value)">
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
                     </select>
                 </div>
 
-                <div class="setting-row danger" onclick="alert('Функция пока недоступна')">
+                <!-- Кнопка удаления всех данных теперь активна -->
+                <div class="setting-row danger" onclick="actionDeleteAll()">
                     <div class="setting-label">
-                        <i class="fas fa-trash-alt"></i> Удалить все данные
+                        <i class="fas fa-trash-alt"></i> <span data-i18n="delete_all">Удалить все данные</span>
                     </div>
                 </div>
             </div>
-
-            <div style="text-align: center; color: #555; margin-top: 30px; font-size: 12px;">
-                Tg Cloud v2.4 Alpha
-            </div>
+            
+            <div style="text-align: center; color: #555; margin-top: 30px; font-size: 12px;">Tg Cloud v2.5</div>
         </div>
     </div>
 
-    <!-- Кнопки и модалки остались без изменений -->
     <div class="fab-add" id="fab-add" onclick="handleAddClick()">
         <i class="fas fa-plus"></i>
     </div>
@@ -140,42 +129,42 @@
     </div>
 
     <div id="context-menu" class="context-menu" style="display: none;">
-        <div class="context-item" onclick="actionShare()"><i class="fas fa-share-alt"></i> Поделиться</div>
-        <div class="context-item" onclick="actionMove()"><i class="fas fa-folder-open"></i> В папку</div>
-        <div class="context-item" onclick="actionRename()"><i class="fas fa-edit"></i> Переименовать</div>
-        <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;"><i class="fas fa-folder-minus"></i> Убрать</div>
-        <div class="context-item delete" onclick="actionDelete()"><i class="fas fa-trash"></i> Удалить</div>
+        <div class="context-item" onclick="actionShare()"><i class="fas fa-share-alt"></i> <span data-i18n="action_share">Поделиться</span></div>
+        <div class="context-item" onclick="actionMove()"><i class="fas fa-folder-open"></i> <span data-i18n="action_move">В папку</span></div>
+        <div class="context-item" onclick="actionRename()"><i class="fas fa-edit"></i> <span data-i18n="action_rename">Переименовать</span></div>
+        <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;"><i class="fas fa-folder-minus"></i> <span data-i18n="action_remove">Убрать</span></div>
+        <div class="context-item delete" onclick="actionDelete()"><i class="fas fa-trash"></i> <span data-i18n="action_delete">Удалить</span></div>
     </div>
     <div id="menu-overlay" class="menu-overlay" onclick="closeContextMenu()" style="display: none;"></div>
 
     <div id="modal-create-folder" class="modal-overlay">
         <div class="modal-box">
-            <h3>Новая папка</h3>
-            <input type="text" class="modal-input" id="folder-input" placeholder="Название...">
+            <h3 data-i18n="modal_new_folder">Новая папка</h3>
+            <input type="text" class="modal-input" id="folder-input" placeholder="...">
             <div class="modal-buttons">
-                <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
-                <button class="btn btn-primary" onclick="submitCreateFolder()">Создать</button>
+                <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
+                <button class="btn btn-primary" onclick="submitCreateFolder()" data-i18n="btn_create">Создать</button>
             </div>
         </div>
     </div>
 
     <div id="modal-add-files" class="modal-overlay">
         <div class="modal-box">
-            <h3>Добавить в папку</h3>
-            <div class="modal-list" id="picker-list">Загрузка...</div>
+            <h3 data-i18n="modal_add_files">Добавить в папку</h3>
+            <div class="modal-list" id="picker-list">...</div>
             <div class="modal-buttons">
-                <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
-                <button class="btn btn-primary" onclick="submitMoveFiles()">Добавить</button>
+                <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
+                <button class="btn btn-primary" onclick="submitMoveFiles()" data-i18n="btn_add">Добавить</button>
             </div>
         </div>
     </div>
 
     <div id="modal-select-folder" class="modal-overlay">
         <div class="modal-box">
-            <h3>Переместить в...</h3>
-            <div class="modal-list" id="folder-list">Загрузка...</div>
+            <h3 data-i18n="modal_move_to">Переместить в...</h3>
+            <div class="modal-list" id="folder-list">...</div>
             <div class="modal-buttons">
-                <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
+                <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
             </div>
         </div>
     </div>
