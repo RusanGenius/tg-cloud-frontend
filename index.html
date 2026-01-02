@@ -10,15 +10,23 @@
 </head>
 <body>
 
-    <!-- Верхняя навигация (появляется только внутри папок) -->
+    <!-- Верхняя навигация -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
             <i class="fas fa-chevron-left"></i> Назад
         </div>
     </div>
 
-    <!-- Сетка файлов -->
-    <div class="grid" id="file-grid"></div>
+    <!-- Контейнер для сетки с поддержкой оверлея загрузки -->
+    <div style="position: relative; min-height: 100vh;">
+        <!-- Сетка файлов -->
+        <div class="grid" id="file-grid"></div>
+        
+        <!-- Лоадер (Спиннер) -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+    </div>
 
     <!-- Кнопка "+" внутри папки -->
     <div class="fab-add" id="fab-add" onclick="handleAddClick()">
@@ -27,12 +35,28 @@
 
     <!-- Нижняя панель навигации -->
     <div class="bottom-bar">
-        <i class="nav-item fas fa-th active" onclick="setTab('all', this)"></i> <!-- Все -->
-        <i class="nav-item fas fa-image" onclick="setTab('image', this)"></i> <!-- Фото -->
-        <i class="nav-item fas fa-video" onclick="setTab('video', this)"></i> <!-- Видео -->
-        <i class="nav-item fas fa-file-alt" onclick="setTab('doc', this)"></i> <!-- Файлы -->
-        <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i> <!-- Папки -->
+        <!-- ИЗМЕНЕНИЕ: Иконка домика -->
+        <i class="nav-item fas fa-home active" onclick="setTab('all', this)"></i> 
+        <i class="nav-item fas fa-image" onclick="setTab('image', this)"></i>
+        <i class="nav-item fas fa-video" onclick="setTab('video', this)"></i>
+        <i class="nav-item fas fa-file-alt" onclick="setTab('doc', this)"></i>
+        <i class="nav-item fas fa-folder" onclick="setTab('folders', this)"></i>
     </div>
+
+    <!-- Глобальное Контекстное Меню (Kebab Menu) -->
+    <div id="context-menu" class="context-menu" style="display: none;">
+        <div class="context-item" onclick="actionShare()">
+            <i class="fas fa-share-alt"></i> Поделиться
+        </div>
+        <div class="context-item" onclick="actionMove()">
+            <i class="fas fa-folder-open"></i> В папку
+        </div>
+        <div class="context-item delete" onclick="actionDelete()">
+            <i class="fas fa-trash"></i> Удалить
+        </div>
+    </div>
+    <!-- Невидимая подложка для закрытия меню -->
+    <div id="menu-overlay" class="menu-overlay" onclick="closeContextMenu()" style="display: none;"></div>
 
     <!-- МОДАЛКА 1: Создание папки -->
     <div id="modal-create-folder" class="modal-overlay">
@@ -46,18 +70,25 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА 2: Выбор файлов для добавления -->
+    <!-- МОДАЛКА 2: Выбор файлов (для добавления В текущую папку) -->
     <div id="modal-add-files" class="modal-overlay">
         <div class="modal-box">
             <h3>Добавить в папку</h3>
-            <p style="font-size: 12px; color: #888;">Выберите файлы из общего списка</p>
-            <div class="modal-list" id="picker-list">
-                <!-- Сюда JS загрузит файлы -->
-                Загрузка...
-            </div>
+            <div class="modal-list" id="picker-list">Загрузка...</div>
             <div class="modal-buttons">
                 <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
                 <button class="btn btn-primary" onclick="submitMoveFiles()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА 3: Выбор папки (Куда переместить файл) -->
+    <div id="modal-select-folder" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Переместить в...</h3>
+            <div class="modal-list" id="folder-list">Загрузка...</div>
+            <div class="modal-buttons">
+                <button class="btn btn-sec" onclick="closeModals()">Отмена</button>
             </div>
         </div>
     </div>

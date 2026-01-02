@@ -1,12 +1,11 @@
 :root {
     --bg-color: #000000;
-    /* Более прозрачное стекло */
     --glass-bg: rgba(40, 40, 40, 0.3); 
     --glass-border: rgba(255, 255, 255, 0.08);
-    /* Акцент теперь белый */
     --accent: #ffffff; 
     --text-primary: #ffffff;
     --text-secondary: #8e8e93;
+    --danger: #ff453a;
 }
 
 body {
@@ -15,144 +14,153 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0; padding: 0;
     padding-bottom: 100px;
-    -webkit-tap-highlight-color: transparent; /* Убирает синий клик на андроиде */
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Сетка */
+/* Сетка и эффекты загрузки */
 .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 5px; /* Зазор меньше, как в галерее */
+    gap: 5px;
     padding: 10px;
     padding-top: 60px;
+    transition: filter 0.3s ease; /* Плавное размытие */
 }
+
+/* Класс для размытия при загрузке */
+.grid.blurred {
+    filter: blur(5px);
+    pointer-events: none;
+}
+
+/* Оверлей со спиннером */
+.loading-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 40; /* Под навигацией, но над сеткой */
+    display: flex; align-items: center; justify-content: center;
+}
+
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* Карточка файла */
 .item {
     background: var(--glass-bg);
-    /* Убрали сильное размытие, сделали прозрачнее */
     backdrop-filter: blur(5px); 
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid var(--glass-border);
-    border-radius: 8px; /* Чуть строже углы */
+    border-radius: 8px;
     aspect-ratio: 1 / 1;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    /* ВАЖНО: Прижимаем контент к низу */
-    justify-content: flex-end; 
-    align-items: center;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
     overflow: hidden;
 }
 
-/* Превью (картинка) */
 .item-preview {
     width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;
     opacity: 0.8; transition: opacity 0.2s;
 }
 
-/* Иконки (если нет превью) */
-.icon { 
-    font-size: 30px; 
-    margin-bottom: auto; /* Хак: толкает иконку вверх, чтобы она была по центру */
-    margin-top: auto; 
-    z-index: 2; 
-}
+.icon { font-size: 30px; margin-bottom: auto; margin-top: auto; z-index: 2; }
 .folder-icon { color: #ffd60a; font-size: 40px; }
 .file-icon { color: var(--text-secondary); }
 .icon-video { color: var(--accent); }
 
-/* Название файла */
 .name {
-    z-index: 2; 
-    font-size: 10px; 
-    text-align: center;
-    width: 100%;
+    z-index: 2; font-size: 10px; text-align: center; width: 100%;
     padding: 4px 2px;
-    /* Градиент, чтобы текст читался на фото */
     background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;
 }
 
-/* Кнопка удаления */
-.delete-btn {
-    position: absolute; top: 0; right: 0; padding: 6px; z-index: 10;
-    color: rgba(255,255,255,0.7);
+/* Кнопка "3 точки" (Меню) */
+.menu-btn {
+    position: absolute; top: 0; right: 0; padding: 8px; z-index: 10;
+    color: rgba(255,255,255,0.9);
+    font-size: 14px;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
 }
 
-/* Навигация сверху */
+/* КОНТЕКСТНОЕ МЕНЮ */
+.menu-overlay {
+    position: fixed; top:0; left:0; width:100%; height:100%; z-index: 199;
+    background: transparent;
+}
+.context-menu {
+    position: fixed; /* Позиционируем JS-ом */
+    width: 160px;
+    background: rgba(30, 30, 30, 0.85);
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    z-index: 200;
+    display: flex; flex-direction: column;
+    padding: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* Анимация появления */
+    animation: popIn 0.15s ease-out;
+}
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.context-item {
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.context-item:active { background: rgba(255,255,255,0.1); }
+.context-item.delete { color: var(--danger); }
+
+/* Остальные стили без изменений */
 .top-nav {
     position: fixed; top: 0; left: 0; right: 0; height: 50px;
     display: flex; align-items: center; padding: 0 15px;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-    z-index: 50;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 50;
 }
-.breadcrumbs {
-    font-size: 16px; font-weight: 600; color: var(--accent);
-    display: flex; align-items: center; gap: 8px; cursor: pointer;
-}
+.breadcrumbs { font-size: 16px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; cursor: pointer; }
 
-/* НИЖНЯЯ ПАНЕЛЬ */
 .bottom-bar {
-    position: fixed; bottom: 20px; left: 20px; right: 20px;
-    height: 60px;
-    background: rgba(30, 30, 30, 0.5); /* Более прозрачная */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
+    position: fixed; bottom: 20px; left: 20px; right: 20px; height: 60px;
+    background: rgba(30, 30, 30, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
     display: flex; justify-content: space-around; align-items: center;
-    z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
+.nav-item { color: #555; font-size: 20px; padding: 10px; transition: 0.2s; cursor: pointer; }
+.nav-item.active { color: var(--accent); transform: scale(1.1); text-shadow: 0 0 15px rgba(255, 255, 255, 0.4); }
 
-.nav-item {
-    color: #555; /* Серый в покое */
-    font-size: 20px; padding: 10px;
-    transition: 0.2s; cursor: pointer;
-}
-.nav-item.active {
-    color: var(--accent); /* Белый активный */
-    transform: scale(1.1);
-    /* Белое свечение */
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4); 
-}
-
-/* Плавающая кнопка (Белая) */
 .fab-add {
-    position: fixed; bottom: 95px; right: 20px;
-    width: 50px; height: 50px;
-    background: var(--accent); 
-    color: black; /* Черный плюсик */
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
-    z-index: 90;
-    display: none;
+    position: fixed; bottom: 95px; right: 20px; width: 50px; height: 50px;
+    background: var(--accent); color: black; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+    box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2); z-index: 90; display: none;
 }
 
-/* Модальные окна */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
     z-index: 200; display: none; align-items: center; justify-content: center;
 }
 .modal-box {
-    background: #151515; border: 1px solid #333;
-    padding: 20px; border-radius: 20px; width: 80%; max-width: 300px;
-    text-align: center; color: white;
+    background: #151515; border: 1px solid #333; padding: 20px; border-radius: 20px;
+    width: 80%; max-width: 300px; text-align: center; color: white;
 }
-.modal-list {
-    max-height: 50vh; overflow-y: auto; text-align: left; margin: 15px 0;
-}
-.modal-item {
-    padding: 12px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 12px;
-}
+.modal-list { max-height: 50vh; overflow-y: auto; text-align: left; margin: 15px 0; }
+.modal-item { padding: 12px; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 12px; }
 .modal-item.selected { background: #333; }
 .modal-item.selected .check-icon { color: var(--accent); }
-
 .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
 .btn { border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 14px;}
 .btn-primary { background: var(--accent); color: black; }
