@@ -14,6 +14,7 @@
     --input-bg: #222;
     --switch-bg: rgba(120, 120, 128, 0.3);
     --folder-color: #ffd60a;
+    --glider-bg: #3a3a3c; 
 }
 
 /* --- СВЕТЛАЯ ТЕМА --- */
@@ -32,6 +33,7 @@
     --input-bg: #e5e5ea;
     --switch-bg: rgba(120, 120, 128, 0.15);
     --folder-color: #ffcc00;
+    --glider-bg: #ffffff;
 }
 
 body {
@@ -249,12 +251,11 @@ body {
     position: absolute;
     top: 2px; 
     bottom: 2px;
-    left: 2px; /* Добавили явный отступ слева */
+    left: 2px; 
+    width: calc(50% - 4px);
     
-    /* ИЗМЕНЕНИЕ: Ширина 50% минус 4px (2px отступ слева + 2px отступ справа) */
-    width: calc(50% - 4px); 
+    background: var(--glider-bg); 
     
-    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     box-shadow: 0 3px 8px rgba(0,0,0,0.12);
     border-radius: 6px;
