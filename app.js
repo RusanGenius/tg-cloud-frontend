@@ -2,47 +2,28 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 tg.enableClosingConfirmation();
 
-// --- КОНФИГУРАЦИЯ (ОБЯЗАТЕЛЬНО ЗАПОЛНИ) ---
-// 1. Ссылка на твой Бэкенд (Render) без слеша в конце
-const API_URL = "https://my-tg-cloud-api.onrender.com"; 
+const API_URL = "https://my-tg-cloud-api.onrender.com"; // ⚠️ ПРОВЕРЬ ССЫЛКУ!
+const USER_ID = tg.initDataUnsafe?.user?.id; // Или хардкод для теста
 
-// 2. Юзернейм твоего бота (без @), чтобы работали ссылки "Поделиться"
-const BOT_USERNAME = "RusanCloudBot"; 
-
-// ID пользователя
-const USER_ID = tg.initDataUnsafe?.user?.id;
-// const USER_ID = 123456789; // Раскомментируй для тестов в браузере
-
-// --- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ---
 let currentState = {
     tab: 'all',        // all, image, video, doc, folders
     folderId: null,    // null = корень, или UUID папки
-    cache: [],         // Кеш данных
-    selectedFiles: []  // Для перемещения файлов
+    cache: [],         // Кеш файлов текущего вида
+    selectedFiles: []  // Для перемещения
 };
 
-let activeMenuId = null; // Какой меню сейчас открыто
-
-// Элементы DOM
 const grid = document.getElementById('file-grid');
 const topNav = document.getElementById('top-nav');
 const fabAdd = document.getElementById('fab-add');
-const loader = document.getElementById('loading-overlay');
-
-// Закрываем меню при клике в пустоту
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.item')) {
-        closeAllMenus();
-    }
-});
 
 // --- 1. ПЕРЕКЛЮЧЕНИЕ ТАБОВ ---
 function setTab(tabName, el) {
+    // Анимация иконок
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     if(el) el.classList.add('active');
 
     currentState.tab = tabName;
-    currentState.folderId = null; // При смене таба сбрасываем папку
+    currentState.folderId = null; // Сброс папки при смене таба
     
     updateUI();
     loadData();
@@ -50,58 +31,61 @@ function setTab(tabName, el) {
 
 // --- 2. ЗАГРУЗКА ДАННЫХ ---
 async function loadData() {
-    loader.classList.add('visible');
-    grid.classList.add('loading-blur');
+    grid.innerHTML = '<div style="color:#666; text-align:center; padding:50px;">Загрузка...</div>';
     
     try {
         let url = `${API_URL}/api/files?user_id=${USER_ID}`;
         
-        // Логика режимов
         if (currentState.tab === 'folders') {
-            // Режим ПАПОК: Строгий (показываем только содержимое текущей папки)
-            const fId = currentState.folderId ? currentState.folderId : 'null';
-            url += `&folder_id=${fId}&mode=strict`;
+            // РЕЖИМ ПАПОК (СТРОГИЙ)
+            if (currentState.folderId) {
+                // Внутри папки
+                url += `&folder_id=${currentState.folderId}&mode=strict`;
+            } else {
+                // Корень папок
+                url += `&folder_id=null&mode=strict`;
+            }
         } else {
-            // Режим ГАЛЕРЕИ: Глобальный (показываем всё подряд из всех папок)
+            // РЕЖИМ ГАЛЕРЕИ (ГЛОБАЛЬНЫЙ)
+            // Показываем всё, игнорируя папки
             url += `&mode=global`;
         }
 
         const res = await fetch(url);
-        currentState.cache = await res.json();
+        const files = await res.json();
+        currentState.cache = files;
         renderGrid();
-        
     } catch (e) {
         console.error(e);
-        grid.innerHTML = '<div style="color:red; text-align:center; padding-top:50px;">Ошибка сети</div>';
-    } finally {
-        loader.classList.remove('visible');
-        grid.classList.remove('loading-blur');
+        grid.innerHTML = '<div style="color:red; text-align:center; padding:50px;">Ошибка сети</div>';
     }
 }
 
-// --- 3. ОТРИСОВКА СЕТКИ ---
+// --- 3. ОТРИСОВКА ---
 function renderGrid() {
     grid.innerHTML = '';
     
+    // Фильтрация
     let items = currentState.cache;
 
-    // --- ФИЛЬТРАЦИЯ ---
-    if (currentState.tab === 'folders') {
-        if (!currentState.folderId) {
-            // Если мы в корне вкладки "Папки" -> Показываем ТОЛЬКО папки
-            // Файлы, лежащие в корне, скрываем (они доступны во вкладке "Все")
+    // Если мы НЕ внутри папки, применяем фильтры табов
+    if (!currentState.folderId) {
+        if (currentState.tab === 'folders') {
             items = items.filter(i => i.type === 'folder');
+        } else if (currentState.tab === 'image') {
+            items = items.filter(i => i.name.match(/\.(jpg|jpeg|png)$/i));
+        } else if (currentState.tab === 'video') {
+            items = items.filter(i => i.name.match(/\.(mp4|mov)$/i));
+        } else if (currentState.tab === 'doc') {
+            items = items.filter(i => i.type === 'file' && !i.name.match(/\.(jpg|png|mp4)$/i));
+        } else {
+            // Tab 'All' - показываем файлы, но НЕ папки (папки только в табе папок)
+            items = items.filter(i => i.type !== 'folder');
         }
-    } else {
-        // В глобальных вкладках (Все, Фото...) папки не показываем
-        if (currentState.tab === 'image') items = items.filter(i => i.name.match(/\.(jpg|jpeg|png)$/i));
-        else if (currentState.tab === 'video') items = items.filter(i => i.name.match(/\.(mp4|mov)$/i));
-        else if (currentState.tab === 'doc') items = items.filter(i => i.type === 'file' && !i.name.match(/\.(jpg|png|mp4|mov)$/i));
-        // Если tab === 'all', то API уже вернул всё кроме папок (из-за mode=global), фильтровать не надо
     }
 
     if (items.length === 0) {
-        grid.innerHTML = '<div style="color:#777; text-align:center; grid-column:1/-1; padding-top:50px;">Пусто</div>';
+        grid.innerHTML = '<div style="color:#555; text-align:center; grid-column:1/-1; padding-top:50px;">Пусто</div>';
         return;
     }
 
@@ -109,7 +93,7 @@ function renderGrid() {
         const el = document.createElement('div');
         el.className = 'item';
         
-        // Генерация контента
+        // Контент плитки (Иконки/Превью)
         let content = '';
         if (item.type === 'folder') {
             content = `<i class="icon fas fa-folder folder-icon"></i>`;
@@ -126,131 +110,39 @@ function renderGrid() {
         el.innerHTML = `
             ${content}
             <div class="name">${item.name}</div>
-            <div class="menu-btn-trigger" onclick="toggleMenu(event, '${item.id}', '${item.type}')">
-                <i class="fas fa-ellipsis-v"></i>
+            <div class="delete-btn" onclick="deleteItem(event, '${item.id}')">
+                <i class="fas fa-trash"></i>
             </div>
         `;
 
         el.onclick = (e) => {
-            if(e.target.closest('.menu-btn-trigger') || e.target.closest('.context-menu')) return;
+            // Если кликнули по корзине - не открывать файл (остановка всплытия уже есть в deleteItem, но проверка тут не помешает)
+            if(e.target.closest('.delete-btn')) return;
             
-            if (item.type === 'folder') openFolder(item.id);
-            else downloadFile(item);
+            if (item.type === 'folder') {
+                openFolder(item.id);
+            } else {
+                downloadFile(item);
+            }
         };
         grid.appendChild(el);
     });
 }
 
-// --- 4. КОНТЕКСТНОЕ МЕНЮ ---
-function toggleMenu(e, itemId, type) {
-    e.stopPropagation();
+function updateUI() {
+    // Показываем/скрываем шапку "Назад"
+    topNav.style.display = currentState.folderId ? 'flex' : 'none';
     
-    // Если меню уже открыто у этого файла - закрываем
-    if (activeMenuId === itemId) {
-        closeAllMenus();
-        return;
-    }
-    closeAllMenus();
-    activeMenuId = itemId;
-
-    const parent = e.target.closest('.item');
-    const menu = document.createElement('div');
-    menu.className = 'context-menu';
-
-    // --- УМНОЕ ПОЗИЦИОНИРОВАНИЕ ---
-    // Если клик был в правой части экрана -> меню открывается влево
-    if (e.clientX > window.innerWidth / 2) {
-        menu.style.right = '5px';
-        menu.style.left = 'auto';
+    // Показываем кнопку "+" ТОЛЬКО если мы внутри папки (в табе Folders)
+    // ИЛИ если мы в корне таба Folders (чтобы создать папку)
+    if (currentState.tab === 'folders') {
+        fabAdd.style.display = 'flex';
     } else {
-        menu.style.left = '5px';
-        menu.style.right = 'auto';
+        fabAdd.style.display = 'none';
     }
-
-    const shareUrl = `https://t.me/${BOT_USERNAME}?start=file_${itemId}`;
-    let menuHtml = '';
-
-    if (type !== 'folder') {
-        menuHtml += `<div class="context-item" onclick="shareFile('${shareUrl}')"><i class="fas fa-share-alt"></i> Поделиться</div>`;
-        
-        // Кнопка "Убрать" только внутри папки
-        if (currentState.folderId) {
-            menuHtml += `<div class="context-item" onclick="removeFromFolder(event, '${itemId}')"><i class="fas fa-folder-minus"></i> Убрать</div>`;
-        }
-    }
-    
-    menuHtml += `<div class="context-item delete" onclick="deleteItem(event, '${itemId}')"><i class="fas fa-trash"></i> Удалить</div>`;
-
-    menu.innerHTML = menuHtml;
-    parent.appendChild(menu);
 }
 
-function closeAllMenus() {
-    document.querySelectorAll('.context-menu').forEach(el => el.remove());
-    activeMenuId = null;
-}
-
-// --- 5. ДЕЙСТВИЯ ---
-
-// Убрать из папки (переместить в корень)
-async function removeFromFolder(e, id) {
-    e.stopPropagation();
-    closeAllMenus();
-    tg.MainButton.showProgress();
-    try {
-        await fetch(`${API_URL}/api/move_file`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ file_id: id, folder_id: null })
-        });
-        loadData(); 
-    } catch(e) { tg.showAlert("Ошибка"); }
-    tg.MainButton.hideProgress();
-}
-
-function shareFile(url) {
-    const tempInput = document.createElement("input");
-    tempInput.value = url;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand("copy");
-    document.body.removeChild(tempInput);
-    tg.showAlert("Ссылка скопирована!");
-    closeAllMenus();
-}
-
-async function deleteItem(e, id) {
-    e.stopPropagation();
-    tg.showConfirm("Удалить?", async (ok) => {
-        if(ok) {
-            closeAllMenus();
-            try {
-                await fetch(`${API_URL}/api/delete`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ item_id: id })
-                });
-                loadData();
-            } catch (e) { tg.showAlert("Ошибка удаления"); }
-        }
-    });
-}
-
-async function downloadFile(item) {
-    tg.MainButton.showProgress();
-    try {
-        await fetch(`${API_URL}/api/download`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: USER_ID, file_id: item.file_id, file_name: item.name })
-        });
-        tg.showAlert('Файл отправлен в чат!');
-    } catch (e) { console.error(e); }
-    tg.MainButton.hideProgress();
-}
-
-// --- 6. НАВИГАЦИЯ И СОЗДАНИЕ ---
-
+// --- 4. НАВИГАЦИЯ ---
 function openFolder(id) {
     currentState.folderId = id;
     updateUI();
@@ -263,47 +155,42 @@ function goBack() {
     loadData();
 }
 
-function updateUI() {
-    topNav.style.display = currentState.folderId ? 'flex' : 'none';
-    fabAdd.style.display = (currentState.tab === 'folders') ? 'flex' : 'none';
-}
-
+// --- 5. ЛОГИКА КНОПКИ ПЛЮС ---
 function handleAddClick() {
-    if (currentState.tab === 'folders') {
-        if (!currentState.folderId) {
-            // Создать папку
-            document.getElementById('modal-create-folder').style.display = 'flex';
-            document.getElementById('folder-input').focus();
-        } else {
-            // Добавить файлы
-            openFilePicker();
-        }
+    if (currentState.tab === 'folders' && !currentState.folderId) {
+        // Мы в списке папок -> Создать папку
+        document.getElementById('modal-create-folder').style.display = 'flex';
+        document.getElementById('folder-input').focus();
+    } else if (currentState.folderId) {
+        // Мы ВНУТРИ папки -> Добавить файлы
+        openFilePicker();
     }
 }
 
+// --- 6. СОЗДАНИЕ ПАПКИ ---
 async function submitCreateFolder() {
     const name = document.getElementById('folder-input').value;
     if(!name) return;
+    
     closeModals();
-    tg.MainButton.showProgress();
     try {
         await fetch(`${API_URL}/api/create_folder`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_id: USER_ID, name: name, parent_id: null })
+            body: JSON.stringify({ user_id: USER_ID, name: name, parent_id: null }) // Папки всегда в корне
         });
         loadData();
-    } catch(e) { tg.showAlert('Ошибка создания'); }
-    tg.MainButton.hideProgress();
+    } catch(e) { alert('Ошибка'); }
 }
 
+// --- 7. ДОБАВЛЕНИЕ ФАЙЛОВ (PICKER) ---
 async function openFilePicker() {
     const modal = document.getElementById('modal-add-files');
     const list = document.getElementById('picker-list');
     modal.style.display = 'flex';
     list.innerHTML = 'Загрузка...';
 
-    // В пикере показываем ВСЕ файлы (Global), чтобы можно было выбрать любой
+    // Загружаем файлы из корня (root)
     const res = await fetch(`${API_URL}/api/files?user_id=${USER_ID}&mode=global`);
     const files = await res.json();
 
@@ -311,20 +198,20 @@ async function openFilePicker() {
     currentState.selectedFiles = [];
 
     if (files.length === 0) {
-        list.innerHTML = '<div style="padding:10px; color:#777;">Нет файлов.</div>';
+        list.innerHTML = '<div style="padding:10px; color:#777;">Нет свободных файлов. Загрузите что-нибудь боту в чат!</div>';
         return;
     }
 
     files.forEach(f => {
-        if (f.type === 'folder') return; // Папки в пикере не нужны
         const div = document.createElement('div');
         div.className = 'modal-item';
         div.innerHTML = `
             <i class="fas fa-file"></i>
-            <div style="flex:1; overflow:hidden; text-overflow:ellipsis; font-size:14px;">${f.name}</div>
+            <div style="flex:1; overflow:hidden; text-overflow:ellipsis;">${f.name}</div>
             <i class="far fa-circle check-icon"></i>
         `;
         div.onclick = () => {
+            // Toggle selection
             if (currentState.selectedFiles.includes(f.id)) {
                 currentState.selectedFiles = currentState.selectedFiles.filter(id => id !== f.id);
                 div.classList.remove('selected');
@@ -343,6 +230,8 @@ async function submitMoveFiles() {
     if (currentState.selectedFiles.length === 0) return;
     closeModals();
     tg.MainButton.showProgress();
+
+    // Отправляем запросы по одному (можно оптимизировать, но так проще)
     for (const fileId of currentState.selectedFiles) {
         await fetch(`${API_URL}/api/move_file`, {
             method: 'POST',
@@ -350,13 +239,37 @@ async function submitMoveFiles() {
             body: JSON.stringify({ file_id: fileId, folder_id: currentState.folderId })
         });
     }
+
     tg.MainButton.hideProgress();
-    loadData();
+    loadData(); // Обновляем текущую папку
 }
 
+// --- УТИЛИТЫ ---
 function closeModals() {
     document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
 }
 
+async function deleteItem(e, id) {
+    e.stopPropagation();
+    if(!confirm('Удалить?')) return;
+    await fetch(`${API_URL}/api/delete`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ item_id: id })
+    });
+    loadData();
+}
+
+async function downloadFile(item) {
+    tg.MainButton.showProgress();
+    await fetch(`${API_URL}/api/download`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: USER_ID, file_id: item.file_id, file_name: item.name })
+    });
+    tg.MainButton.hideProgress();
+    tg.showAlert('Отправлено!');
+}
+
 // Старт
-setTab('all', document.querySelector('.nav-item.fa-home'));
+setTab('all', document.querySelector('.nav-item'));
