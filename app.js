@@ -117,7 +117,7 @@ async function actionDonate(amount) {
                 // Callback после закрытия окна оплаты
                 if (status === 'paid') {
                     tg.close(); // Можно закрыть приложение или показать салют
-                    setTimeout(() => showToast("🌟 Спасибо за поддержку!"), 500);
+                    setTimeout(() => showToast("⭐ Спасибо за поддержку!"), 500);
                 } else if (status === 'failed') {
                     showToast(t('invoice_error'));
                 }
