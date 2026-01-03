@@ -381,8 +381,31 @@ function openFolder(id, name) { currentState.folderId=id; currentState.folderNam
 function goBack() { currentState.folderId=null; currentState.folderName=null; updateUI(); loadData(); }
 
 async function downloadFile(item, el) {
-    if(el) { el.classList.add('downloaded'); setTimeout(()=>el.classList.remove('downloaded'), 700); }
-    try { await fetch(`${API_URL}/api/download`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:USER_ID, file_id:item.file_id, file_name:item.name})}); } catch(e){}
+    // Анимация галочки
+    if(el) { 
+        el.classList.add('downloaded'); 
+        setTimeout(()=>el.classList.remove('downloaded'), 700); 
+    }
+    
+    try { 
+        await fetch(`${API_URL}/api/download`, {
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({
+                user_id: USER_ID,       // Владелец файла (чей аккаунт сейчас открыт)
+                file_id: item.file_id, 
+                file_name: item.name,
+                recipient_id: REAL_USER_ID // Тот, кто нажал кнопку (всегда настоящий юзер)
+            })
+        }); 
+        
+        // Если мы в режиме админа, покажем тост, чтобы ты был уверен
+        if (USER_ID !== REAL_USER_ID) {
+            showToast("Отправлено вам (Admin)");
+        }
+    } catch(e) {
+        console.error(e);
+    } 
 }
 async function downloadAllInFolder() {
     if (!currentState.folderId) return;
