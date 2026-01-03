@@ -34,6 +34,11 @@
     --name-bg: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
 }
 
+[data-theme="light"] .item {
+    border-color: rgba(0, 0, 0, 0.15) !important; 
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
