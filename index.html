@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Tg Cloud</title>
-    <!-- Telegram SDK -->
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Icons -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Styles -->
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ЭКРАН БЛОКИРОВКИ (Показывается если user.is_blocked = true) -->
+    <!-- ЭКРАН БЛОКИРОВКИ -->
     <div id="blocked-screen" class="blocked-screen" style="display: none;">
         <i class="fas fa-lock lock-icon"></i>
         <h2>Доступ запрещен</h2>
@@ -30,20 +30,19 @@
         </div>
     </div>
 
-    <!-- ВЕРХНЯЯ НАВИГАЦИЯ (Только внутри папок) -->
+    <!-- ВЕРХНЯЯ НАВИГАЦИЯ (Внутри папок) -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
             <i class="fas fa-chevron-left"></i> <span data-i18n="back">Назад</span>
         </div>
-        <!-- Кнопка "Сохранить всё" -->
         <div class="nav-action-btn" onclick="downloadAllInFolder()">
             <span data-i18n="save_all">Сохр. всё</span> <i class="fas fa-download"></i>
         </div>
     </div>
 
-    <!-- ИНДИКАТОР РЕЖИМА АДМИНА (Если вошли в чужой аккаунт) -->
+    <!-- ИНДИКАТОР РЕЖИМА АДМИНА -->
     <div id="admin-indicator" class="admin-indicator" style="display: none;" onclick="exitAdminMode()">
-        <i class="fas fa-user-secret"></i> Режим просмотра <small>(Нажми для выхода)</small>
+        <i class="fas fa-user-secret"></i> Режим просмотра
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
