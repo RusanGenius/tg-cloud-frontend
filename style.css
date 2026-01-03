@@ -186,7 +186,7 @@ body {
 
 /* ADMIN INDICATOR */
 .admin-indicator {
-    position: fixed; top: 55px; left: 50%; transform: translateX(-50%);
+    position: fixed; top: 65px; left: 50%; transform: translateX(-50%);
     background: #ff453a; color: white; padding: 5px 15px; border-radius: 20px;
     font-size: 12px; z-index: 55; box-shadow: 0 5px 10px rgba(0,0,0,0.3);
     cursor: pointer; display: flex; align-items: center; gap: 5px;
