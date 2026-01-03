@@ -192,6 +192,59 @@ body {
     cursor: pointer; display: flex; align-items: center; gap: 5px;
 }
 
+/* --- DONATE CARD (GOLD) --- */
+.donate-card {
+    background: linear-gradient(135deg, #FFD700, #FDB931); /* Золотой градиент */
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #4a3b00; /* Темно-золотой/коричневый текст для контраста */
+    box-shadow: 0 4px 15px rgba(253, 185, 49, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Блик на золоте */
+.donate-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+    transform: rotate(30deg); pointer-events: none;
+}
+
+.donate-header {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-weight: 800; font-size: 16px; margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    z-index: 2; position: relative;
+}
+.donate-icon-main { font-size: 18px; animation: pulseStar 2s infinite; }
+
+@keyframes pulseStar { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+.donate-buttons-row {
+    display: flex; gap: 10px; justify-content: space-between; z-index: 2; position: relative;
+}
+
+.donate-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    padding: 10px 0;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.2s, background 0.2s;
+    color: #4a3b00;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+
+.donate-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.5); }
+.donate-btn i { font-size: 12px; margin-top: -1px; } /* Звездочка чуть меньше цифры */
+.star-amount { font-size: 18px; }
+
 /* --- НИЖНИЙ БАР --- */
 .bottom-bar {
     position: fixed; bottom: 20px; left: 20px; right: 20px; height: 60px;
