@@ -13,6 +13,13 @@
 </head>
 <body>
 
+    <!-- ЭКРАН БЛОКИРОВКИ (Показывается если user.is_blocked = true) -->
+    <div id="blocked-screen" class="blocked-screen" style="display: none;">
+        <i class="fas fa-lock lock-icon"></i>
+        <h2>Доступ запрещен</h2>
+        <p>Ваш аккаунт заблокирован администратором.</p>
+    </div>
+
     <!-- ХЕДЕР ПРИЛОЖЕНИЯ -->
     <div class="app-header">
         <div class="app-title" id="header-title">
@@ -32,6 +39,11 @@
         <div class="nav-action-btn" onclick="downloadAllInFolder()">
             <span data-i18n="save_all">Сохр. всё</span> <i class="fas fa-download"></i>
         </div>
+    </div>
+
+    <!-- ИНДИКАТОР РЕЖИМА АДМИНА (Если вошли в чужой аккаунт) -->
+    <div id="admin-indicator" class="admin-indicator" style="display: none;" onclick="exitAdminMode()">
+        <i class="fas fa-user-secret"></i> Режим просмотра <small>(Нажми для выхода)</small>
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
@@ -55,9 +67,9 @@
         </div>
 
         <div class="settings-content">
-            <!-- Карточка профиля -->
+            <!-- Карточка профиля (Клик по аватару открывает админку, если ты админ) -->
             <div class="profile-card">
-                <div class="profile-avatar" id="profile-avatar">
+                <div class="profile-avatar" id="profile-avatar" onclick="handleAvatarClick()">
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="profile-info">
@@ -163,7 +175,20 @@
             </div>
 
             <div style="text-align: center; color: var(--text-secondary); margin-top: 30px; font-size: 12px;">
-                Tg Cloud v2.8
+                Tg Cloud v3.0
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА: ADMIN PANEL -->
+    <div id="modal-admin" class="modal-overlay">
+        <div class="modal-box glass-box" style="max-width: 350px; height: 70vh; display: flex; flex-direction: column;">
+            <h3>👑 Admin Panel</h3>
+            <div id="admin-user-list" style="flex: 1; overflow-y: auto; margin-top: 10px;">
+                Загрузка...
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-sec" onclick="closeModals()">Закрыть</button>
             </div>
         </div>
     </div>
@@ -182,6 +207,8 @@
         <div class="context-item" onclick="actionRenamePrompt()">
             <i class="fas fa-edit"></i> <span data-i18n="action_rename">Переименовать</span>
         </div>
+        
+        <!-- Кнопка "Убрать" для файлов внутри папки -->
         <div class="context-item" id="btn-remove-from-folder" onclick="actionRemoveFromFolder()" style="display: none; color: #ff9f0a;">
             <i class="fas fa-folder-minus"></i> <span data-i18n="action_remove">Убрать</span>
         </div>
@@ -191,7 +218,7 @@
             <i class="fas fa-trash"></i> <span data-i18n="action_delete">Удалить</span>
         </div>
         
-        <!-- НОВАЯ КНОПКА: Рекурсивное удаление (только для папок) -->
+        <!-- Кнопка рекурсивного удаления (только для папок) -->
         <div class="context-item delete" id="btn-delete-recursive" onclick="confirmDelete(true)" style="display: none;">
             <i class="fas fa-trash-alt"></i> <span data-i18n="action_delete_rec">С файлами</span>
         </div>
@@ -230,7 +257,7 @@
     <div id="modal-prompt" class="modal-overlay">
         <div class="modal-box glass-box">
             <h3 id="prompt-title">...</h3>
-            <input type="text" class="modal-input" id="prompt-input" autocomplete="off" placeholder="...">
+            <input type="text" class="modal-input" id="prompt-input" autocomplete="off">
             <div class="modal-buttons">
                 <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
                 <button class="btn btn-primary" id="prompt-submit-btn" data-i18n="btn_ok">ОК</button>
@@ -242,9 +269,7 @@
     <div id="modal-confirm" class="modal-overlay">
         <div class="modal-box glass-box">
             <h3 id="confirm-title" data-i18n="confirm_title">Подтверждение</h3>
-            <p id="confirm-text" style="margin: 15px 0; font-size: 14px; color: var(--text-secondary); line-height: 1.4;">
-                ...
-            </p>
+            <p id="confirm-text" style="margin: 10px 0; font-size: 14px; color: var(--text-secondary);">...</p>
             <div class="modal-buttons">
                 <button class="btn btn-sec" onclick="closeModals()" data-i18n="btn_cancel">Отмена</button>
                 <button class="btn btn-danger" id="confirm-submit-btn" data-i18n="btn_delete">Удалить</button>
@@ -262,8 +287,8 @@
             </div>
         </div>
     </div>
-
-    <!-- ВСПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ (Toast) -->
+    
+    <!-- Всплывающее уведомление (Toast) -->
     <div id="toast" class="toast">Сообщение</div>
 
     <!-- FAB: КНОПКА ПЛЮС -->

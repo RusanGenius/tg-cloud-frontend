@@ -1,14 +1,13 @@
 // --- ИНИЦИАЛИЗАЦИЯ ---
 const tg = window.Telegram.WebApp;
 tg.expand();
-// Устанавливаем цвет хедера в зависимости от темы (по умолчанию черный)
-tg.headerColor = '#000000'; 
+tg.headerColor = '#000000'; // Дефолтный цвет хедера
 
-// Укажи здесь адрес своего бэкенда
-const API_URL = "https://my-tg-cloud-api.onrender.com"; 
-
-const USER_ID = tg.initDataUnsafe?.user?.id;
-const BOT_USERNAME = "RusanCloudBot"; // Замени на юзернейм своего бота без @
+const API_URL = "https://my-tg-cloud-api.onrender.com"; // Убедись, что ссылка верная
+const REAL_USER_ID = tg.initDataUnsafe?.user?.id; // Настоящий ID того, кто открыл приложение
+let USER_ID = REAL_USER_ID; // ID пользователя, чьи файлы мы смотрим (может меняться в админке)
+const BOT_USERNAME = "RusanCloudBot"; 
+const ADMIN_USERNAME = "astermaneiro"; // Секретный юзернейм админа
 
 // --- НАСТРОЙКИ (Считываем из памяти или ставим дефолт) ---
 let currentLang = localStorage.getItem('tg_cloud_lang') || 'ru';
@@ -30,13 +29,8 @@ const translations = {
         modal_new_folder: "Новая папка", modal_add_files: "Добавить файлы", modal_move_to: "Переместить в...",
         btn_cancel: "Отмена", btn_create: "Создать", btn_add: "Добавить", btn_close: "Закрыть", btn_ok: "ОК", btn_delete: "Удалить",
         prompt_rename: "Новое имя", prompt_folder_name: "Имя папки",
-        confirm_title: "Удаление", 
-        confirm_msg_file: "Удалить этот файл навсегда?", 
-        confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", 
-        confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", 
-        confirm_msg_all: "Стереть вообще все данные?",
+        confirm_title: "Удаление", confirm_msg_file: "Удалить этот файл навсегда?", confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", confirm_msg_all: "Стереть вообще все данные?",
         alert_copied: "Ссылка скопирована!", 
-        alert_share_folder_hint: "Отправьте ссылку другу",
         tab_all: "Все файлы", tab_image: "Фотопленка", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Мои папки", app_title: "Tg Cloud"
     },
     en: {
@@ -51,13 +45,8 @@ const translations = {
         modal_new_folder: "New Folder", modal_add_files: "Add Files", modal_move_to: "Move to...",
         btn_cancel: "Cancel", btn_create: "Create", btn_add: "Add", btn_close: "Close", btn_ok: "OK", btn_delete: "Delete",
         prompt_rename: "New name", prompt_folder_name: "Folder name",
-        confirm_title: "Deletion", 
-        confirm_msg_file: "Delete this file permanently?", 
-        confirm_msg_folder: "Delete folder? Files will move to root.", 
-        confirm_msg_recursive: "Delete folder and ALL content?", 
-        confirm_msg_all: "Wipe ALL data?",
+        confirm_title: "Deletion", confirm_msg_file: "Delete this file permanently?", confirm_msg_folder: "Delete folder? Files will move to root.", confirm_msg_recursive: "Delete folder and ALL content?", confirm_msg_all: "Wipe ALL data?",
         alert_copied: "Link copied!", 
-        alert_share_folder_hint: "Send link to friend",
         tab_all: "All Files", tab_image: "Photos", tab_video: "Videos", tab_doc: "Documents", tab_folders: "Folders", app_title: "Tg Cloud"
     }
 };
@@ -69,99 +58,60 @@ function updateLanguage() {
     updateSlider('lang-switch', 'lang-glider', currentLang);
     if (!currentState.folderId) updateHeaderTitle();
 }
-
 function changeLanguage(lang) {
     currentLang = lang; localStorage.setItem('tg_cloud_lang', lang);
     updateLanguage(); loadData();
 }
 
-// --- ТЕМА И СЛАЙДЕРЫ ---
 function setTheme(theme) {
     currentTheme = theme; localStorage.setItem('tg_cloud_theme', theme);
     document.body.setAttribute('data-theme', theme);
-    if(tg) { 
-        tg.headerColor = (theme === 'dark') ? '#000000' : '#ffffff'; 
-        tg.backgroundColor = (theme === 'dark') ? '#000000' : '#f2f2f7'; 
-    }
+    if(tg) { tg.headerColor = (theme === 'dark') ? '#000000' : '#ffffff'; tg.backgroundColor = (theme === 'dark') ? '#000000' : '#f2f2f7'; }
     updateSlider('theme-switch', 'theme-glider', theme);
 }
 
-function setGridSize(size) { 
-    currentGrid = size; localStorage.setItem('tg_cloud_grid', size); 
-    updateSlider('grid-switch', 'grid-glider', size.toString()); 
-    renderGrid(); 
-}
+function setGridSize(size) { currentGrid = size; localStorage.setItem('tg_cloud_grid', size); updateSlider('grid-switch', 'grid-glider', size.toString()); renderGrid(); }
+function setSort(type) { currentSort = type; localStorage.setItem('tg_cloud_sort', type); updateSlider('sort-switch', 'sort-glider', type); renderGrid(); }
 
-function setSort(type) { 
-    currentSort = type; localStorage.setItem('tg_cloud_sort', type); 
-    updateSlider('sort-switch', 'sort-glider', type); 
-    renderGrid(); 
-}
-
+// Анимация слайдеров
 function updateSlider(cId, gId, val) {
     const c = document.getElementById(cId); const g = document.getElementById(gId);
     if(!c || !g) return;
     const opts = c.querySelectorAll('.segmented-option');
-    opts.forEach((opt, i) => { 
-        if(opt.dataset.val === val) { 
-            opt.classList.add('active'); 
-            g.style.transform = `translateX(${i * 100}%)`; 
-        } else {
-            opt.classList.remove('active');
-        }
-    });
+    opts.forEach((opt, i) => { if(opt.dataset.val === val) { opt.classList.add('active'); g.style.transform = `translateX(${i * 100}%)`; } else opt.classList.remove('active'); });
 }
 
 // --- STATE ---
 let currentState = { tab: 'all', folderId: null, folderName: null, cache: [], selectedFiles: [], contextItem: null };
-
-// Запуск при старте
-setTheme(currentTheme); 
-setGridSize(currentGrid); 
-setSort(currentSort); 
-updateLanguage();
+setTheme(currentTheme); setGridSize(currentGrid); setSort(currentSort); updateLanguage();
 
 function updateHeaderTitle() {
     const h = document.getElementById('header-title');
-    if (currentState.folderId && currentState.folderName) {
-        h.innerHTML = `<i class="fas fa-folder-open"></i> ${currentState.folderName}`;
-    } else {
+    if (currentState.folderId && currentState.folderName) h.innerHTML = `<i class="fas fa-folder-open"></i> ${currentState.folderName}`;
+    else {
         let k='app_title', i='cloud';
-        if(currentState.tab==='all') k='tab_all'; 
-        if(currentState.tab==='image'){k='tab_image';i='image';} 
-        if(currentState.tab==='video'){k='tab_video';i='video';} 
-        if(currentState.tab==='doc'){k='tab_doc';i='file-alt';} 
-        if(currentState.tab==='folders'){k='tab_folders';i='folder';}
+        if(currentState.tab==='all') k='tab_all'; if(currentState.tab==='image'){k='tab_image';i='image';} if(currentState.tab==='video'){k='tab_video';i='video';} if(currentState.tab==='doc'){k='tab_doc';i='file-alt';} if(currentState.tab==='folders'){k='tab_folders';i='folder';}
         h.innerHTML = `<i class="fas fa-${i}"></i> ${t(k)}`;
     }
 }
 
-// --- UI HELPERS (Модалки и Уведомления) ---
-
-// Всплывающее уведомление (Toast)
+// --- UI HELPERS (Modals & Toasts) ---
 function showToast(text) {
     const el = document.getElementById('toast');
-    if(!el) return;
     el.innerText = text; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-// Стеклянный Prompt (ввод текста)
 function openPrompt(title, placeholder, callback) {
     const modal = document.getElementById('modal-prompt');
     const input = document.getElementById('prompt-input');
     const btn = document.getElementById('prompt-submit-btn');
-    
     document.getElementById('prompt-title').innerText = title;
-    input.value = ""; 
-    input.placeholder = placeholder || "";
+    input.value = ""; input.placeholder = placeholder;
+    modal.style.display = 'flex'; input.focus();
     
-    modal.style.display = 'flex'; 
-    input.focus();
-    
-    // Удаляем старые слушатели, клонируя кнопку
-    const newBtn = btn.cloneNode(true); 
-    btn.parentNode.replaceChild(newBtn, btn);
+    // Удаляем старые листенеры
+    const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);
     
     newBtn.onclick = () => {
         const val = input.value.trim();
@@ -169,159 +119,228 @@ function openPrompt(title, placeholder, callback) {
     };
 }
 
-// Стеклянный Confirm (подтверждение)
 function openConfirm(title, text, callback) {
     const modal = document.getElementById('modal-confirm');
     const btn = document.getElementById('confirm-submit-btn');
-    
     document.getElementById('confirm-title').innerText = title;
     document.getElementById('confirm-text').innerText = text;
     modal.style.display = 'flex';
     
-    const newBtn = btn.cloneNode(true); 
-    btn.parentNode.replaceChild(newBtn, btn);
-    
-    newBtn.onclick = () => { 
-        callback(); 
-        closeModals(); 
-    };
+    const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.onclick = () => { callback(); closeModals(); };
 }
 
-// --- НАСТРОЙКИ ---
+function closeModals() { document.querySelectorAll('.modal-overlay').forEach(el=>el.style.display='none'); }
+
+// --- SETTINGS ---
 async function openSettings() {
     document.getElementById('settings-view').style.display = 'flex';
-    updateSlider('theme-switch', 'theme-glider', currentTheme); 
-    updateSlider('lang-switch', 'lang-glider', currentLang);
-    updateSlider('grid-switch', 'grid-glider', currentGrid.toString()); 
-    updateSlider('sort-switch', 'sort-glider', currentSort);
+    updateSlider('theme-switch', 'theme-glider', currentTheme); updateSlider('lang-switch', 'lang-glider', currentLang);
+    updateSlider('grid-switch', 'grid-glider', currentGrid.toString()); updateSlider('sort-switch', 'sort-glider', currentSort);
     
+    // Загрузка статистики текущего USER_ID (мой или кого просматриваю)
+    try { 
+        const res = await fetch(`${API_URL}/api/profile?user_id=${USER_ID}`);
+        // Если юзер заблокирован, получим 403
+        if(res.status === 403) {
+            document.getElementById('blocked-screen').style.display = 'flex';
+            return;
+        }
+        const s = await res.json();
+        document.getElementById('stat-photos').innerText=s.counts.photos; document.getElementById('stat-videos').innerText=s.counts.videos;
+        document.getElementById('stat-docs').innerText=s.counts.docs; document.getElementById('stat-folders').innerText=s.counts.folders;
+        document.getElementById('storage-used').innerText=s.total_size_mb+' MB';
+    } catch(e){}
+
+    // Отображение профиля
     const user = tg.initDataUnsafe?.user;
-    if (user) {
+    
+    if (USER_ID === REAL_USER_ID && user) {
+        // Это мой реальный аккаунт
         document.getElementById('profile-name').innerText = (user.first_name + ' ' + (user.last_name||'')).trim();
         document.getElementById('profile-username').innerText = user.username ? '@'+user.username : 'ID: '+user.id;
         if(user.first_name) document.getElementById('profile-avatar').innerText = user.first_name[0];
+    } else if (USER_ID !== REAL_USER_ID) {
+        // Режим слежки
+        document.getElementById('profile-name').innerText = "Impersonated User";
+        document.getElementById('profile-username').innerText = "ID: " + USER_ID;
+        document.getElementById('profile-avatar').innerText = "?";
     }
-    
-    try { 
-        const res = await fetch(`${API_URL}/api/profile?user_id=${USER_ID}`); 
-        const s = await res.json();
-        document.getElementById('stat-photos').innerText=s.counts.photos; 
-        document.getElementById('stat-videos').innerText=s.counts.videos;
-        document.getElementById('stat-docs').innerText=s.counts.docs; 
-        document.getElementById('stat-folders').innerText=s.counts.folders;
-        document.getElementById('storage-used').innerText=s.total_size_mb+' MB';
-    } catch(e){}
 }
-
 function closeSettings() { document.getElementById('settings-view').style.display = 'none'; }
-
 function confirmDeleteAll() {
     openConfirm(t('delete_all'), t('confirm_msg_all'), async () => {
-        try { 
-            await fetch(`${API_URL}/api/delete_all`, {
-                method:'POST', headers:{'Content-Type':'application/json'}, 
-                body:JSON.stringify({user_id:USER_ID})
-            }); 
-            closeSettings(); 
-            setTab('all'); 
-        } catch(e){ showToast("Error"); }
+        try { await fetch(`${API_URL}/api/delete_all`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:USER_ID})}); closeSettings(); setTab('all'); } catch(e){}
     });
 }
 
-// --- ЗАГРУЗКА И РЕНДЕР ДАННЫХ ---
+
+// --- ADMIN LOGIC (СЕКРЕТНАЯ ЧАСТЬ) ---
+function handleAvatarClick() {
+    const user = tg.initDataUnsafe?.user;
+    // Проверяем, что это реальный админ
+    if (user && user.username === ADMIN_USERNAME) {
+        openAdminPanel();
+    }
+}
+
+async function openAdminPanel() {
+    document.getElementById('modal-admin').style.display = 'flex';
+    const list = document.getElementById('admin-user-list');
+    list.innerHTML = 'Загрузка...';
+    
+    try {
+        const res = await fetch(`${API_URL}/api/admin/users`, {
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({admin_id: REAL_USER_ID})
+        });
+        
+        if (res.status !== 200) throw new Error();
+        
+        const users = await res.json();
+        list.innerHTML = '';
+        
+        users.forEach(u => {
+            const row = document.createElement('div');
+            row.className = 'admin-row';
+            
+            const blockedClass = u.is_blocked ? 'blocked' : '';
+            const blockIcon = u.is_blocked ? 'fa-lock' : 'fa-unlock';
+            const isMe = u.username === ADMIN_USERNAME;
+
+            row.innerHTML = `
+                <div class="admin-user">
+                    <span>${isMe ? '👑 ' : ''}${u.username || 'Unknown'}</span>
+                    <small>ID: ${u.id}</small>
+                </div>
+                <div class="admin-actions">
+                    <button class="btn-icon btn-view" onclick="impersonateUser(${u.id})"><i class="fas fa-eye"></i></button>
+                    ${!isMe ? `
+                    <button class="btn-icon btn-block ${blockedClass}" onclick="toggleBlockUser(this, ${u.id})"><i class="fas ${blockIcon}"></i></button>
+                    <button class="btn-icon btn-del" onclick="deleteUserAdmin(${u.id})"><i class="fas fa-trash"></i></button>
+                    ` : ''}
+                </div>
+            `;
+            list.appendChild(row);
+        });
+    } catch(e) { 
+        list.innerHTML = 'Ошибка доступа или сети'; 
+    }
+}
+
+function impersonateUser(targetId) {
+    USER_ID = targetId; // Подменяем ID для всех запросов
+    document.getElementById('admin-indicator').style.display = 'flex'; // Показываем красную плашку
+    closeModals(); // Закрываем админку
+    closeSettings(); // Закрываем настройки
+    setTab('all'); // Перезагружаем файлы уже для нового юзера
+    showToast(`Вошли как ID: ${targetId}`);
+}
+
+function exitAdminMode() {
+    USER_ID = REAL_USER_ID; // Возвращаем свой ID
+    document.getElementById('admin-indicator').style.display = 'none';
+    setTab('all');
+    showToast("Возврат в свой аккаунт");
+}
+
+async function toggleBlockUser(btn, targetId) {
+    if(!confirm("Изменить статус блокировки?")) return;
+    try {
+        const res = await fetch(`${API_URL}/api/admin/block`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({admin_id: REAL_USER_ID, target_user_id: targetId})
+        });
+        const data = await res.json();
+        if(data.status === 'ok') {
+            if(data.is_blocked) { btn.classList.add('blocked'); btn.innerHTML = '<i class="fas fa-lock"></i>'; }
+            else { btn.classList.remove('blocked'); btn.innerHTML = '<i class="fas fa-unlock"></i>'; }
+        }
+    } catch(e) { showToast("Ошибка"); }
+}
+
+async function deleteUserAdmin(targetId) {
+    if(!confirm("УДАЛИТЬ ПОЛЬЗОВАТЕЛЯ И ВСЕ ДАННЫЕ?")) return;
+    try {
+        await fetch(`${API_URL}/api/admin/delete_user`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({admin_id: REAL_USER_ID, target_user_id: targetId})
+        });
+        openAdminPanel(); // Обновляем список
+    } catch(e) { showToast("Ошибка"); }
+}
+
+
+// --- DATA LOGIC (Loading & Rendering) ---
 function setTab(name, el) {
-    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); 
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     if(el) el.classList.add('active');
-    currentState.tab = name; 
-    currentState.folderId = null; 
-    currentState.folderName = null; 
-    updateUI(); 
-    loadData();
+    currentState.tab=name; currentState.folderId=null; currentState.folderName=null;
+    updateUI(); loadData();
 }
 
 async function loadData() {
-    document.getElementById('file-grid').classList.add('blurred'); 
+    document.getElementById('file-grid').classList.add('blurred');
     document.getElementById('loading-overlay').style.display='flex';
+    document.getElementById('blocked-screen').style.display = 'none'; // Скрываем блокировку по дефолту
+
     try {
         let url = `${API_URL}/api/files?user_id=${USER_ID}`;
-        if(currentState.tab==='folders') {
-            url += currentState.folderId ? `&folder_id=${currentState.folderId}&mode=strict` : `&folder_id=null&mode=strict`;
-        } else {
-            url += `&mode=global`;
-        }
+        if(currentState.tab==='folders') url+=currentState.folderId ? `&folder_id=${currentState.folderId}&mode=strict` : `&folder_id=null&mode=strict`;
+        else url+=`&mode=global`;
         
-        const res = await fetch(url); 
-        currentState.cache = await res.json(); 
+        const res = await fetch(url);
+        
+        // ОБРАБОТКА БЛОКИРОВКИ
+        if(res.status === 403) {
+            document.getElementById('loading-overlay').style.display='none';
+            document.getElementById('blocked-screen').style.display = 'flex';
+            return;
+        }
+
+        currentState.cache = await res.json();
         renderGrid();
     } catch(e){ console.error(e); } 
     finally { 
         document.getElementById('file-grid').classList.remove('blurred'); 
-        document.getElementById('loading-overlay').style.display='none'; 
+        if(document.getElementById('blocked-screen').style.display !== 'flex') {
+            document.getElementById('loading-overlay').style.display='none'; 
+        }
     }
 }
 
 function renderGrid() {
-    const grid = document.getElementById('file-grid'); 
-    grid.innerHTML = ''; 
-    grid.className = 'grid'; 
-    grid.classList.add(`cols-${currentGrid}`); 
+    const grid=document.getElementById('file-grid');
+    grid.innerHTML=''; grid.className='grid';
+    grid.classList.add(`cols-${currentGrid}`);
     if(currentState.folderId) grid.classList.add('with-nav');
-    
-    let items = currentState.cache;
-    
-    // Фильтрация
-    if(!currentState.folderId) {
-        if(currentState.tab==='folders') items = items.filter(i=>i.type==='folder');
-        else if(currentState.tab==='image') items = items.filter(i=>i.name.match(/\.(jpg|jpeg|png)$/i));
-        else if(currentState.tab==='video') items = items.filter(i=>i.name.match(/\.(mp4|mov)$/i));
-        else if(currentState.tab==='doc') items = items.filter(i=>i.type==='file' && !i.name.match(/\.(jpg|png|mp4)$/i));
-        else items = items.filter(i=>i.type!=='folder');
-    }
-    
-    // Сортировка
-    items.sort((a,b) => { 
-        if(currentSort==='name') return a.name.localeCompare(b.name); 
-        if(currentSort==='size') return (b.size||0)-(a.size||0); 
-        return new Date(b.created_at) - new Date(a.created_at); 
-    });
 
-    if(items.length===0) { 
-        grid.innerHTML=`<div style="color:var(--text-secondary); text-align:center; grid-column:1/-1; padding-top:50px;">${t('empty')}</div>`; 
-        return; 
+    let items=currentState.cache;
+    if(!currentState.folderId) {
+        if(currentState.tab==='folders') items=items.filter(i=>i.type==='folder');
+        else if(currentState.tab==='image') items=items.filter(i=>i.name.match(/\.(jpg|jpeg|png)$/i));
+        else if(currentState.tab==='video') items=items.filter(i=>i.name.match(/\.(mp4|mov)$/i));
+        else if(currentState.tab==='doc') items=items.filter(i=>i.type==='file' && !i.name.match(/\.(jpg|png|mp4)$/i));
+        else items=items.filter(i=>i.type!=='folder');
     }
+
+    items.sort((a,b)=>{ if(currentSort==='name') return a.name.localeCompare(b.name); if(currentSort==='size') return (b.size||0)-(a.size||0); return new Date(b.created_at)-new Date(a.created_at); });
+
+    if(items.length===0) { grid.innerHTML=`<div style="color:var(--text-secondary); text-align:center; grid-column:1/-1; padding-top:50px;">${t('empty')}</div>`; return; }
 
     items.forEach(item => {
-        const el = document.createElement('div'); 
-        el.className = 'item'; 
-        el.id = `item-${item.id}`;
-        
-        let c = ''; 
+        const el=document.createElement('div'); el.className='item'; el.id=`item-${item.id}`;
+        let c='';
         if(item.type==='folder') {
-            c = `<i class="icon fas fa-folder folder-icon"></i>`; 
-        } else { 
-            if(item.name.match(/\.(jpg|png)$/i)) c = `<img src="${API_URL}/api/preview/${item.file_id}" class="item-preview" loading="lazy">`; 
-            else if(item.name.match(/\.mp4$/i)) c = `<i class="icon fas fa-video icon-video"></i>`; 
-            else c = `<i class="icon fas fa-file file-icon"></i>`; 
+            c=`<i class="icon fas fa-folder folder-icon"></i>`;
+        } else {
+            if(item.name.match(/\.(jpg|png)$/i)) c=`<img src="${API_URL}/api/preview/${item.file_id}" class="item-preview" loading="lazy">`;
+            else if(item.name.match(/\.mp4$/i)) c=`<i class="icon fas fa-video icon-video"></i>`;
+            else c=`<i class="icon fas fa-file file-icon"></i>`;
         }
-        
-        // Передача данных в onclick (encode)
-        const itemStr = encodeURIComponent(JSON.stringify(item));
-        
-        el.innerHTML = `
-            ${c}
-            <div class="success-overlay"><i class="fas fa-check"></i></div>
-            <div class="name">${item.name}</div>
-            <div class="menu-btn" onclick="openContextMenu(event, '${itemStr}')">
-                <i class="fas fa-ellipsis-v"></i>
-            </div>
-        `;
-        
-        el.onclick = (e) => { 
-            if(e.target.closest('.menu-btn')) return; 
-            if(item.type==='folder') openFolder(item.id, item.name); 
-            else downloadFile(item, el); 
-        };
-        
+        el.innerHTML = `${c}<div class="success-overlay"><i class="fas fa-check"></i></div><div class="name">${item.name}</div><div class="menu-btn" onclick="openContextMenu(event, '${encodeURIComponent(JSON.stringify(item))}')"><i class="fas fa-ellipsis-v"></i></div>`;
+        el.onclick=(e)=>{ if(e.target.closest('.menu-btn')) return; if(item.type==='folder') openFolder(item.id, item.name); else downloadFile(item, el); };
         grid.appendChild(el);
     });
 }
@@ -331,45 +350,20 @@ function updateUI() {
     document.getElementById('fab-add').style.display = (currentState.tab==='folders') ? 'flex' : 'none';
     updateHeaderTitle();
 }
+function openFolder(id, name) { currentState.folderId=id; currentState.folderName=name; updateUI(); loadData(); }
+function goBack() { currentState.folderId=null; currentState.folderName=null; updateUI(); loadData(); }
 
-function openFolder(id, name) { 
-    currentState.folderId = id; 
-    currentState.folderName = name; 
-    updateUI(); 
-    loadData(); 
-}
-
-function goBack() { 
-    currentState.folderId = null; 
-    currentState.folderName = null; 
-    updateUI(); 
-    loadData(); 
-}
-
-// --- СКАЧИВАНИЕ ---
 async function downloadFile(item, el) {
-    if(el) { 
-        el.classList.add('downloaded'); 
-        setTimeout(() => el.classList.remove('downloaded'), 700); 
-    }
-    try { 
-        await fetch(`${API_URL}/api/download`, {
-            method:'POST', headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({user_id:USER_ID, file_id:item.file_id, file_name:item.name})
-        }); 
-    } catch(e){}
+    if(el) { el.classList.add('downloaded'); setTimeout(()=>el.classList.remove('downloaded'), 700); }
+    try { await fetch(`${API_URL}/api/download`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:USER_ID, file_id:item.file_id, file_name:item.name})}); } catch(e){}
 }
-
 async function downloadAllInFolder() {
     if(!currentState.folderId) return;
-    const items = currentState.cache.filter(i => i.type!=='folder');
-    for(let i=0; i<items.length; i++) { 
-        const el = document.getElementById(`item-${items[i].id}`);
-        setTimeout(() => downloadFile(items[i], el), i*300); 
-    }
+    const items = currentState.cache.filter(i=>i.type!=='folder');
+    for(let i=0; i<items.length; i++) { setTimeout(()=>downloadFile(items[i], document.getElementById(`item-${items[i].id}`)), i*300); }
 }
 
-// --- ИНФОРМАЦИЯ О ФАЙЛЕ (НОВАЯ ДАТА) ---
+// --- INFO FORMATTING ---
 function formatDateTime(isoStr) {
     const d = new Date(isoStr);
     const date = ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth()+1)).slice(-2) + '.' + d.getFullYear();
@@ -378,179 +372,106 @@ function formatDateTime(isoStr) {
 }
 
 function actionInfo() {
-    const item = currentState.contextItem; 
-    closeContextMenu();
-    
-    document.getElementById('modal-info').style.display = 'flex';
+    const item = currentState.contextItem; closeContextMenu();
+    document.getElementById('modal-info').style.display='flex';
     document.getElementById('info-name').innerText = item.name;
     document.getElementById('info-type').innerText = item.type==='folder' ? 'Папка' : item.name.split('.').pop().toUpperCase();
-    
-    let s = '0 B'; 
-    if(item.size){ 
-        if(item.size>1024*1024) s = (item.size/(1024*1024)).toFixed(2)+' MB'; 
-        else s = (item.size/1024).toFixed(2)+' KB'; 
-    }
+    let s='0 B'; if(item.size){ if(item.size>1024*1024) s=(item.size/(1024*1024)).toFixed(2)+' MB'; else s=(item.size/1024).toFixed(2)+' KB'; }
     document.getElementById('info-size').innerText = s;
-    
     const dt = formatDateTime(item.created_at);
     document.getElementById('info-date').innerText = `${dt.date} ${dt.time}`;
 }
 
-// --- КОНТЕКСТНОЕ МЕНЮ ---
+// --- CONTEXT MENU & ACTIONS ---
 function openContextMenu(e, itemStr) {
     e.stopPropagation();
     const item = JSON.parse(decodeURIComponent(itemStr));
     currentState.contextItem = item;
     
-    // Логика отображения кнопок
-    const isFolder = item.type === 'folder';
-    document.getElementById('btn-remove-from-folder').style.display = (currentState.folderId && !isFolder) ? 'flex' : 'none';
-    
-    // Кнопка рекурсивного удаления только для папок
-    document.getElementById('btn-delete-recursive').style.display = isFolder ? 'flex' : 'none';
+    // Показываем/скрываем кнопки в зависимости от типа
+    document.getElementById('btn-remove-from-folder').style.display = (currentState.folderId && item.type==='file') ? 'flex' : 'none';
+    document.getElementById('btn-delete-recursive').style.display = (item.type==='folder') ? 'flex' : 'none';
     
     const menu = document.getElementById('context-menu');
-    let left = e.clientX - 140; 
-    if(left < 10) left = 10; 
-    if(e.clientX + 50 > window.innerWidth) left = window.innerWidth - 170;
-    
-    menu.style.left = `${left}px`; 
-    menu.style.top = `${e.clientY + 10}px`;
-    menu.style.display = 'flex'; 
-    document.getElementById('menu-overlay').style.display = 'block';
+    let left = e.clientX - 140; if(left<10) left=10; if(e.clientX+50>window.innerWidth) left=window.innerWidth-170;
+    menu.style.left = `${left}px`; menu.style.top = `${e.clientY+10}px`;
+    menu.style.display='flex'; document.getElementById('menu-overlay').style.display='block';
 }
-
-function closeContextMenu() { 
-    document.getElementById('context-menu').style.display = 'none'; 
-    document.getElementById('menu-overlay').style.display = 'none'; 
-}
-
-// --- ДЕЙСТВИЯ МЕНЮ ---
+function closeContextMenu() { document.getElementById('context-menu').style.display='none'; document.getElementById('menu-overlay').style.display='none'; }
 
 function actionShare() { 
-    const item = currentState.contextItem; 
-    closeContextMenu();
-    // Генерируем ссылку: folder_UUID или file_UUID
+    const item = currentState.contextItem; closeContextMenu();
     const prefix = item.type === 'folder' ? 'folder_' : 'file_';
-    const link = `https://t.me/${BOT_USERNAME}?start=${prefix}${item.id}`;
-    
-    navigator.clipboard.writeText(link).then(() => showToast(t('alert_copied')));
+    navigator.clipboard.writeText(`https://t.me/${BOT_USERNAME}?start=${prefix}${item.id}`).then(()=>showToast(t('alert_copied')));
 }
 
 function actionRenamePrompt() {
-    const item = currentState.contextItem; 
-    closeContextMenu();
+    const item = currentState.contextItem; closeContextMenu();
     let oldName = item.name;
-    
     openPrompt(t('prompt_rename'), oldName, async (val) => {
-        // Если это файл и убрали расширение, добавляем обратно
         if(item.type!=='folder' && oldName.includes('.')) { 
             const ext = '.' + oldName.split('.').pop();
             if(!val.endsWith(ext)) val += ext;
         }
-        await fetch(`${API_URL}/api/rename`, { 
-            method:'POST', headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({item_id:item.id, new_name:val})
-        });
+        await fetch(`${API_URL}/api/rename`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({item_id:item.id, new_name:val})});
         loadData();
     });
 }
 
 function confirmDelete(recursive) {
-    const item = currentState.contextItem; 
-    closeContextMenu();
-    
+    const item = currentState.contextItem; closeContextMenu();
     let msgKey = 'confirm_msg_file';
     if (item.type === 'folder') msgKey = recursive ? 'confirm_msg_recursive' : 'confirm_msg_folder';
     
     openConfirm(t('confirm_title'), t(msgKey), async () => {
         const url = recursive ? `${API_URL}/api/delete_folder_recursive` : `${API_URL}/api/delete`;
-        await fetch(url, { 
-            method:'POST', headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({item_id:item.id})
-        });
+        await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({item_id:item.id})});
         loadData();
     });
 }
 
 async function actionRemoveFromFolder() {
-    const item = currentState.contextItem; 
-    closeContextMenu();
-    await fetch(`${API_URL}/api/move_file`, { 
-        method:'POST', headers:{'Content-Type':'application/json'}, 
-        body:JSON.stringify({file_id:item.id, folder_id:null})
-    });
+    const item = currentState.contextItem; closeContextMenu();
+    await fetch(`${API_URL}/api/move_file`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({file_id:item.id, folder_id:null})});
     loadData();
 }
 
 async function actionMove() {
-    const item = currentState.contextItem; 
-    closeContextMenu();
-    
-    const modal = document.getElementById('modal-select-folder'); 
-    const list = document.getElementById('folder-list');
-    
-    modal.style.display = 'flex'; 
-    list.innerHTML = t('loading');
-    
-    const res = await fetch(`${API_URL}/api/files?user_id=${USER_ID}&mode=folders`); 
-    const folders = await res.json();
-    
+    const item = currentState.contextItem; closeContextMenu();
+    const modal = document.getElementById('modal-select-folder'); const list = document.getElementById('folder-list');
+    modal.style.display = 'flex'; list.innerHTML = t('loading');
+    const res = await fetch(`${API_URL}/api/files?user_id=${USER_ID}&mode=folders`); const folders = await res.json();
     list.innerHTML = '';
     
-    // Пункт "Новая папка" прямо в меню перемещения
-    const div = document.createElement('div'); 
-    div.className = 'modal-item'; 
-    div.innerHTML = `<i class="fas fa-plus"></i> <b>${t('modal_new_folder')}</b>`;
+    // Кнопка создать новую папку прямо тут
+    const div = document.createElement('div'); div.className = 'modal-item'; div.innerHTML = `<i class="fas fa-plus"></i> <b>${t('modal_new_folder')}</b>`;
     div.onclick = () => {
         modal.style.display = 'none';
-        openCreateFolderModal((newFolderId) => {
-             // После создания сразу перемещаем туда (newFolderId пока не возвращается бэком в явном виде,
-             // но в реальном проекте лучше возвращать ID созданной папки.
-             // Тут просто перезагрузим для простоты или попросим создать и потом юзер выберет снова)
-             showToast("Folder created");
+        openCreateFolderModal((newId) => {
+             moveFileAPI(item.id, newId);
         });
     };
     list.appendChild(div);
 
-    folders.filter(f => f.id !== item.id).forEach(f => {
-        const d = document.createElement('div'); 
-        d.className = 'modal-item'; 
-        d.innerHTML = `<i class="fas fa-folder text-yellow"></i> ${f.name}`;
+    folders.filter(f=>f.id!==item.id).forEach(f => {
+        const d = document.createElement('div'); d.className='modal-item'; d.innerHTML=`<i class="fas fa-folder text-yellow"></i> ${f.name}`;
         d.onclick = () => moveFileAPI(item.id, f.id);
         list.appendChild(d);
     });
 }
-
 async function moveFileAPI(fileId, folderId) {
-    closeModals(); 
-    tg.MainButton.showProgress();
-    await fetch(`${API_URL}/api/move_file`, {
-        method:'POST', headers:{'Content-Type':'application/json'}, 
-        body:JSON.stringify({file_id:fileId, folder_id:folderId})
-    });
-    tg.MainButton.hideProgress(); 
-    loadData();
+    closeModals(); tg.MainButton.showProgress();
+    await fetch(`${API_URL}/api/move_file`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({file_id:fileId, folder_id:folderId})});
+    tg.MainButton.hideProgress(); loadData();
 }
 
 function openCreateFolderModal(cb) {
     openPrompt(t('modal_new_folder'), t('prompt_folder_name'), async (val) => {
-        await fetch(`${API_URL}/api/create_folder`, { 
-            method:'POST', headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({user_id:USER_ID, name:val, parent_id:currentState.folderId})
-        });
-        if(cb) cb();
+        await fetch(`${API_URL}/api/create_folder`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:USER_ID, name:val, parent_id:currentState.folderId})});
+        if(cb) {} // Callback (для перемещения)
         loadData();
     });
 }
 
-function closeModals() { 
-    document.querySelectorAll('.modal-overlay').forEach(el => el.style.display='none'); 
-}
-
-function handleAddClick() { 
-    if(currentState.tab === 'folders') openCreateFolderModal(); 
-}
-
-// Старт
+// Запуск
 setTab('all', document.querySelector('.nav-item'));
