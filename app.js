@@ -40,7 +40,7 @@ const translations = {
         theme: "Theme", theme_dark: "Dark", theme_light: "Light",
         grid_size: "Grid", sort: "Sort",
         language: "Language", delete_all: "Delete All Data", 
-        action_info: "Info", action_share: "Share", action_move: "Move", action_rename: "Rename", action_remove: "Remove", action_delete: "Delete", action_delete_rec: "Delete w/ files",
+        action_info: "Info", action_share: "Share", action_move: "Move", action_rename: "Rename", action_remove: "Remove", action_delete: "Delete", action_delete_rec: "Delete with files",
         file_info: "Properties", info_name: "Name", info_type: "Type", info_size: "Size", info_date: "Date",
         modal_new_folder: "New Folder", modal_add_files: "Add Files", modal_move_to: "Move to...",
         btn_cancel: "Cancel", btn_create: "Create", btn_add: "Add", btn_close: "Close", btn_ok: "OK", btn_delete: "Delete",
