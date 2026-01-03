@@ -1,21 +1,21 @@
-// --- ИНИЦИАЛИЗАЦИЯ ---
+// --- INITIALIZATION ---
 const tg = window.Telegram.WebApp;
 tg.expand();
-tg.headerColor = '#000000'; // Дефолтный цвет хедера
+tg.headerColor = '#000000';
 
-const API_URL = "https://my-tg-cloud-api.onrender.com"; // Убедись, что ссылка верная
-const REAL_USER_ID = tg.initDataUnsafe?.user?.id; // Настоящий ID того, кто открыл приложение
-let USER_ID = REAL_USER_ID; // ID пользователя, чьи файлы мы смотрим (может меняться в админке)
+const API_URL = "https://my-tg-cloud-api.onrender.com"; 
+const REAL_USER_ID = tg.initDataUnsafe?.user?.id; 
+let USER_ID = REAL_USER_ID;
 const BOT_USERNAME = "RusanCloudBot"; 
-const ADMIN_USERNAME = "astermaneiro"; // Секретный юзернейм админа
+const ADMIN_USERNAME = "astermaneiro";
 
-// --- НАСТРОЙКИ (Считываем из памяти или ставим дефолт) ---
+// --- USER SETTINGS & PREFERENCES ---
 let currentLang = localStorage.getItem('tg_cloud_lang') || 'ru';
 let currentTheme = localStorage.getItem('tg_cloud_theme') || 'dark';
 let currentGrid = parseInt(localStorage.getItem('tg_cloud_grid') || '3');
 let currentSort = localStorage.getItem('tg_cloud_sort') || 'date';
 
-// --- СЛОВАРЬ ---
+// --- LOCALIZATION ---
 const translations = {
     ru: {
         loading: "Загрузка...", empty: "Пусто", back: "Назад", save_all: "Сохр. всё",
@@ -73,7 +73,6 @@ function setTheme(theme) {
 function setGridSize(size) { currentGrid = size; localStorage.setItem('tg_cloud_grid', size); updateSlider('grid-switch', 'grid-glider', size.toString()); renderGrid(); }
 function setSort(type) { currentSort = type; localStorage.setItem('tg_cloud_sort', type); updateSlider('sort-switch', 'sort-glider', type); renderGrid(); }
 
-// Анимация слайдеров
 function updateSlider(cId, gId, val) {
     const c = document.getElementById(cId); const g = document.getElementById(gId);
     if(!c || !g) return;
@@ -95,13 +94,11 @@ function updateHeaderTitle() {
     }
 }
 
-// --- DONATE FUNCTION ---
+// --- DONATIONS ---
 async function actionDonate(amount) {
-    // Анимация нажатия или лоадер (опционально)
     tg.MainButton.showProgress();
     
     try {
-        // 1. Запрашиваем ссылку у нашего бэкенда
         const res = await fetch(`${API_URL}/api/generate_invoice`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -112,11 +109,9 @@ async function actionDonate(amount) {
         tg.MainButton.hideProgress();
 
         if (data.link) {
-            // 2. Открываем нативную шторку оплаты Telegram
             tg.openInvoice(data.link, (status) => {
-                // Callback после закрытия окна оплаты
                 if (status === 'paid') {
-                    tg.close(); // Можно закрыть приложение или показать салют
+                    tg.close();
                     setTimeout(() => showToast("⭐ Спасибо за поддержку!"), 500);
                 } else if (status === 'failed') {
                     showToast(t('invoice_error'));
@@ -132,7 +127,7 @@ async function actionDonate(amount) {
     }
 }
 
-// --- UI HELPERS (Modals & Toasts) ---
+// --- UI HELPERS ---
 function showToast(text) {
     const el = document.getElementById('toast');
     el.innerText = text; el.classList.add('show');
@@ -147,7 +142,6 @@ function openPrompt(title, placeholder, callback) {
     input.value = ""; input.placeholder = placeholder;
     modal.style.display = 'flex'; input.focus();
     
-    // Удаляем старые листенеры
     const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);
     
     newBtn.onclick = () => {
@@ -169,16 +163,15 @@ function openConfirm(title, text, callback) {
 
 function closeModals() { document.querySelectorAll('.modal-overlay').forEach(el=>el.style.display='none'); }
 
-// --- SETTINGS ---
+// --- SETTINGS SCREEN ---
 async function openSettings() {
     document.getElementById('settings-view').style.display = 'flex';
     updateSlider('theme-switch', 'theme-glider', currentTheme); updateSlider('lang-switch', 'lang-glider', currentLang);
     updateSlider('grid-switch', 'grid-glider', currentGrid.toString()); updateSlider('sort-switch', 'sort-glider', currentSort);
     
-    // Загрузка статистики текущего USER_ID (мой или кого просматриваю)
+    // Load stats for the current USER_ID
     try { 
         const res = await fetch(`${API_URL}/api/profile?user_id=${USER_ID}`);
-        // Если юзер заблокирован, получим 403
         if(res.status === 403) {
             document.getElementById('blocked-screen').style.display = 'flex';
             return;
@@ -189,16 +182,14 @@ async function openSettings() {
         document.getElementById('storage-used').innerText=s.total_size_mb+' MB';
     } catch(e){}
 
-    // Отображение профиля
+    // Display profile information
     const user = tg.initDataUnsafe?.user;
     
     if (USER_ID === REAL_USER_ID && user) {
-        // Это мой реальный аккаунт
         document.getElementById('profile-name').innerText = (user.first_name + ' ' + (user.last_name||'')).trim();
         document.getElementById('profile-username').innerText = user.username ? '@'+user.username : 'ID: '+user.id;
         if(user.first_name) document.getElementById('profile-avatar').innerText = user.first_name[0];
     } else if (USER_ID !== REAL_USER_ID) {
-        // Режим слежки
         document.getElementById('profile-name').innerText = "Impersonated User";
         document.getElementById('profile-username').innerText = "ID: " + USER_ID;
         document.getElementById('profile-avatar').innerText = "?";
@@ -212,10 +203,9 @@ function confirmDeleteAll() {
 }
 
 
-// --- ADMIN LOGIC (СЕКРЕТНАЯ ЧАСТЬ) ---
+// --- ADMIN PANEL LOGIC ---
 function handleAvatarClick() {
     const user = tg.initDataUnsafe?.user;
-    // Проверяем, что это реальный админ
     if (user && user.username === ADMIN_USERNAME) {
         openAdminPanel();
     }
@@ -267,16 +257,16 @@ async function openAdminPanel() {
 }
 
 function impersonateUser(targetId) {
-    USER_ID = targetId; // Подменяем ID для всех запросов
-    document.getElementById('admin-indicator').style.display = 'flex'; // Показываем красную плашку
-    closeModals(); // Закрываем админку
-    closeSettings(); // Закрываем настройки
-    setTab('all'); // Перезагружаем файлы уже для нового юзера
+    USER_ID = targetId;
+    document.getElementById('admin-indicator').style.display = 'flex';
+    closeModals();
+    closeSettings();
+    setTab('all');
     showToast(`Вошли как ID: ${targetId}`);
 }
 
 function exitAdminMode() {
-    USER_ID = REAL_USER_ID; // Возвращаем свой ID
+    USER_ID = REAL_USER_ID;
     document.getElementById('admin-indicator').style.display = 'none';
     setTab('all');
     showToast("Возврат в свой аккаунт");
@@ -304,12 +294,12 @@ async function deleteUserAdmin(targetId) {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({admin_id: REAL_USER_ID, target_user_id: targetId})
         });
-        openAdminPanel(); // Обновляем список
+        openAdminPanel();
     } catch(e) { showToast("Ошибка"); }
 }
 
 
-// --- DATA LOGIC (Loading & Rendering) ---
+// --- CORE DATA & RENDERING LOGIC ---
 function setTab(name, el) {
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
     if(el) el.classList.add('active');
@@ -320,7 +310,7 @@ function setTab(name, el) {
 async function loadData() {
     document.getElementById('file-grid').classList.add('blurred');
     document.getElementById('loading-overlay').style.display='flex';
-    document.getElementById('blocked-screen').style.display = 'none'; // Скрываем блокировку по дефолту
+    document.getElementById('blocked-screen').style.display = 'none';
 
     try {
         let url = `${API_URL}/api/files?user_id=${USER_ID}`;
@@ -329,7 +319,7 @@ async function loadData() {
         
         const res = await fetch(url);
         
-        // ОБРАБОТКА БЛОКИРОВКИ
+        // Handle user blocking
         if(res.status === 403) {
             document.getElementById('loading-overlay').style.display='none';
             document.getElementById('blocked-screen').style.display = 'flex';
@@ -395,7 +385,7 @@ async function downloadFile(item, el) {
     try { await fetch(`${API_URL}/api/download`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:USER_ID, file_id:item.file_id, file_name:item.name})}); } catch(e){}
 }
 async function downloadAllInFolder() {
-    if(!currentState.folderId) return;
+    if (!currentState.folderId) return;
     const items = currentState.cache.filter(i=>i.type!=='folder');
     for(let i=0; i<items.length; i++) { setTimeout(()=>downloadFile(items[i], document.getElementById(`item-${items[i].id}`)), i*300); }
 }
@@ -425,7 +415,6 @@ function openContextMenu(e, itemStr) {
     const item = JSON.parse(decodeURIComponent(itemStr));
     currentState.contextItem = item;
     
-    // Показываем/скрываем кнопки в зависимости от типа
     document.getElementById('btn-remove-from-folder').style.display = (currentState.folderId && item.type==='file') ? 'flex' : 'none';
     document.getElementById('btn-delete-recursive').style.display = (item.type==='folder') ? 'flex' : 'none';
     
@@ -480,7 +469,6 @@ async function actionMove() {
     const res = await fetch(`${API_URL}/api/files?user_id=${USER_ID}&mode=folders`); const folders = await res.json();
     list.innerHTML = '';
     
-    // Кнопка создать новую папку прямо тут
     const div = document.createElement('div'); div.className = 'modal-item'; div.innerHTML = `<i class="fas fa-plus"></i> <b>${t('modal_new_folder')}</b>`;
     div.onclick = () => {
         modal.style.display = 'none';
@@ -505,10 +493,9 @@ async function moveFileAPI(fileId, folderId) {
 function openCreateFolderModal(cb) {
     openPrompt(t('modal_new_folder'), t('prompt_folder_name'), async (val) => {
         await fetch(`${API_URL}/api/create_folder`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:USER_ID, name:val, parent_id:currentState.folderId})});
-        if(cb) {} // Callback (для перемещения)
+        if(cb) {}
         loadData();
     });
 }
 
-// Запуск
 setTab('all', document.querySelector('.nav-item'));
