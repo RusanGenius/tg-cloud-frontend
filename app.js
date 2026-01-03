@@ -31,7 +31,7 @@ const translations = {
         prompt_rename: "Новое имя", prompt_folder_name: "Имя папки",
         confirm_title: "Удаление", confirm_msg_file: "Удалить этот файл навсегда?", confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", confirm_msg_all: "Стереть ВСЕ данные?",
         alert_copied: "Ссылка скопирована!", 
-        tab_all: "Все файлы", tab_image: "Фото", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Папки", app_title: "Tg Cloud", donate_title: "Поддержка автора", invoice_error: "Ошибка создания платежа"
+        tab_all: "Все файлы", tab_image: "Фото", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Папки", app_title: "Tg Cloud", donate_title: "Донат", invoice_error: "Ошибка создания платежа"
     },
     en: {
         loading: "Loading...", empty: "Empty", back: "Back", save_all: "Save all",
@@ -47,7 +47,7 @@ const translations = {
         prompt_rename: "New name", prompt_folder_name: "Folder name",
         confirm_title: "Deletion", confirm_msg_file: "Delete this file permanently?", confirm_msg_folder: "Delete folder? Files will move to root.", confirm_msg_recursive: "Delete folder and ALL content?", confirm_msg_all: "Wipe ALL data?",
         alert_copied: "Link copied!", 
-        tab_all: "All Files", tab_image: "Photos", tab_video: "Videos", tab_doc: "Documents", tab_folders: "Folders", app_title: "Tg Cloud", donate_title: "Support Author", invoice_error: "Payment error"
+        tab_all: "All Files", tab_image: "Photos", tab_video: "Videos", tab_doc: "Documents", tab_folders: "Folders", app_title: "Tg Cloud", donate_title: "Donate", invoice_error: "Payment error"
     }
 };
 
