@@ -22,16 +22,16 @@ const translations = {
         settings_title: "Настройки", stat_photos: "Фото", stat_videos: "Видео", stat_files: "Файлы", stat_folders: "Папки",
         used: "Занято", unlimited: "Безлимит",
         theme: "Тема", theme_dark: "Тёмная", theme_light: "Светлая",
-        grid_size: "Сетка", sort: "Сортировка",
+        grid_size: "Сетка", sort: "Сорт...",
         language: "Язык", delete_all: "Удалить все данные", 
         action_info: "Инфо", action_share: "Поделиться", action_move: "В папку", action_rename: "Переименовать", action_remove: "Убрать", action_delete: "Удалить", action_delete_rec: "Удалить с файлами",
         file_info: "Свойства", info_name: "Имя", info_type: "Тип", info_size: "Размер", info_date: "Дата",
         modal_new_folder: "Новая папка", modal_add_files: "Добавить файлы", modal_move_to: "Переместить в...",
         btn_cancel: "Отмена", btn_create: "Создать", btn_add: "Добавить", btn_close: "Закрыть", btn_ok: "ОК", btn_delete: "Удалить",
         prompt_rename: "Новое имя", prompt_folder_name: "Имя папки",
-        confirm_title: "Удаление", confirm_msg_file: "Удалить этот файл навсегда?", confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", confirm_msg_all: "Стереть вообще все данные?",
+        confirm_title: "Удаление", confirm_msg_file: "Удалить этот файл навсегда?", confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", confirm_msg_all: "Стереть ВСЕ данные?",
         alert_copied: "Ссылка скопирована!", 
-        tab_all: "Все файлы", tab_image: "Фотопленка", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Мои папки", app_title: "Tg Cloud"
+        tab_all: "Все файлы", tab_image: "Фото", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Папки", app_title: "Tg Cloud"
     },
     en: {
         loading: "Loading...", empty: "Empty", back: "Back", save_all: "Save all",
