@@ -33,7 +33,7 @@
     --glider-bg: #ffffff;
     --save-bg: rgba(76, 204, 67, 0.6);
     --name-bg: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
-    --text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    --text-shadow: 0 1px 1px rgba(0,0,0,1);
 }
 
 [data-theme="light"] .item {
@@ -115,7 +115,7 @@ body {
 .folder-icon, .file-icon, .icon-video {
     margin-bottom: auto; 
     margin-top: auto;
-    padding-bottom: 1px;
+    padding-bottom: -2px;
     z-index: 2;
     transition: font-size 0.2s ease;
 }
@@ -244,7 +244,7 @@ body {
     backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 215, 0, 0.2);
     border-radius: 16px; /* Slightly smaller radius */
-    padding: 12px 15px; /* Compact padding */
+    padding: 12px 30px; /* Compact padding */
     margin-bottom: 15px;
     text-align: center;
     position: relative;
@@ -286,7 +286,7 @@ body {
 .donate-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px; /* Tighter gap */
+    gap: 15px; /* Tighter gap */
 }
 
 .donate-btn {
@@ -404,21 +404,28 @@ body {
 .setting-label { display: flex; align-items: center; gap: 10px; font-size: 15px; }
 .setting-row.danger { color: var(--danger); border-color: rgba(255, 69, 58, 0.2); cursor: pointer; }
 
-/* --- SEGMENTED CONTROL (REFINED) --- */
+/* --- SEGMENTED CONTROL (ROUNDED & FIXED) --- */
 .segmented-control {
     display: flex; 
     background: rgba(120, 120, 128, 0.2); 
-    padding: 4px; /* Internal padding for "floating" effect */
-    border-radius: 12px; /* More rounded container */
+    padding: 4px; /* Внутренний отступ (рамка) */
+    border-radius: 30px; /* Полное скругление (pill-shape) */
     position: relative; 
     width: 200px; 
-    height: 36px; /* Slightly taller to accommodate padding */
-    box-sizing: border-box;
+    height: 40px; /* Чуть выше для комфортного нажатия */
+    box-sizing: border-box; /* Критически важно для ровных рамок */
 }
 
 .segmented-option {
-    flex: 1; z-index: 2; display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 500; cursor: pointer; transition: color 0.3s;
+    flex: 1; 
+    z-index: 2; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 13px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: color 0.3s;
     color: var(--text-secondary);
 }
 .segmented-option.active { color: var(--text-primary); }
@@ -430,19 +437,22 @@ body {
     bottom: 4px;
     left: 4px; 
     
-    /* Width logic: (100% - padding*2) / num_options */
+    /* Формула: (100% ширины - (padding * 2)) / кол-во опций */
     width: calc((100% - 8px) / 2);
     
     background: var(--glider-bg); 
     
+    /* Убираем лишние бордеры, оставляем тень для объема */
     border: 1px solid var(--glass-border);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    border-radius: 9px; /* Rounded glider */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    
+    border-radius: 30px; /* Скругление глайдера под контейнер */
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 1;
+    box-sizing: border-box;
 }
 
-/* Specific width for 3 options */
+/* Корректировка ширины для 3 опций (Сетка, Сортировка) */
 .segmented-control.three-options .segmented-glider { 
     width: calc((100% - 8px) / 3); 
 }
