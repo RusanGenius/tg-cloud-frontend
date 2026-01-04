@@ -84,7 +84,7 @@ body {
 /* --- TOP NAVIGATION (Inside folders) --- */
 .top-nav {
     position: fixed; top: 50px; left: 0; right: 0; height: 40px;
-    display: flex; align-items: center; justify-content: space-between; /* Разносим кнопки */
+    display: flex; align-items: center; justify-content: space-between;
     padding: 0 15px;
     background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
     z-index: 50;
@@ -111,42 +111,63 @@ body {
 }
 .item-preview { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; opacity: 0.9; transition: opacity 0.2s; }
 
-/* Icons */
-.folder-icon {
-    color: #ffd60a;
-    font-size: 35px;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+/* Icons & Dynamic Sizing based on Grid */
+.folder-icon, .file-icon, .icon-video {
     margin-bottom: auto; 
-    margin-top: auto; 
+    margin-top: auto;
     padding-bottom: 1px;
     z-index: 2;
+    transition: font-size 0.2s ease;
 }
-.file-icon {
-    font-size: 35px;
-    color: var(--text-secondary);
-    margin-bottom: auto; 
-    margin-top: auto;
-    padding-bottom: 1px;
-    z-index: 2; 
+
+.folder-icon { color: #ffd60a; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.file-icon, .icon-video { color: var(--text-secondary); }
+
+/* Grid 4 (Default / Small) */
+.folder-icon, .file-icon, .icon-video { font-size: 35px; }
+.menu-btn { font-size: 14px; padding: 8px; }
+
+/* Grid 3 (Medium) */
+.grid.cols-3 .folder-icon, 
+.grid.cols-3 .file-icon, 
+.grid.cols-3 .icon-video { font-size: 50px; }
+.grid.cols-3 .item .menu-btn { font-size: 18px; padding: 10px; }
+
+/* Grid 2 (Large) */
+.grid.cols-2 .folder-icon, 
+.grid.cols-2 .file-icon, 
+.grid.cols-2 .icon-video { font-size: 70px; }
+.grid.cols-2 .item .menu-btn { font-size: 22px; padding: 12px; }
+
+
+/* Menu Button Styling */
+.menu-btn { 
+    color: var(--text-primary); 
+    text-shadow: 0 0 5px rgba(0,0,0,0.5); 
+    position: absolute; top: 0; right: 0; 
+    z-index: 10; 
+    cursor: pointer;
 }
-.icon-video {
-    font-size: 35px;
-    color: var(--text-secondary);
-    margin-bottom: auto; 
-    margin-top: auto;
-    padding-bottom: 1px;
-    z-index: 2; 
+
+/* Light Theme Menu Button Logic */
+/* 1. Если есть превью (фото) - кнопка белая с тенью (как и раньше) */
+[data-theme="light"] .item:has(.item-preview) .menu-btn {
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
-.menu-btn { color: var(--text-primary); text-shadow: 0 0 5px rgba(0,0,0,0.5); position: absolute; top: 0; right: 0; padding: 8px; z-index: 10; font-size: 14px; }
+/* 2. Если превью нет (документ/видео/папка) - кнопка тёмно-серая без тени */
+[data-theme="light"] .item:not(:has(.item-preview)) .menu-btn {
+    color: #555555;
+    text-shadow: none;
+}
+
 
 .name {
     z-index: 2; 
     font-size: 10px; 
     text-align: center; 
     width: 100%; 
-    padding: 6px 2px 4px 2px; /* Чуть увеличил отступ сверху для красоты */
-    
-    /* ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ: берем цвет из переменной */
+    padding: 6px 2px 4px 2px;
     background: var(--name-bg); 
     
     color: white; 
@@ -155,7 +176,6 @@ body {
     text-overflow: ellipsis; 
     font-weight: 500;
     
-    /* Добавляем тень буквам, чтобы они читались на светлых фото */
     text-shadow: var(--text-shadow);
 }
 
@@ -210,7 +230,7 @@ body {
     cursor: pointer; display: flex; align-items: center; gap: 5px;
 }
 
-/* --- DONATE SECTION --- */
+/* --- DONATE SECTION (Compact) --- */
 
 :root {
     --gold-gradient: linear-gradient(135deg, #FDB931 0%, #ffd700 100%);
@@ -222,12 +242,10 @@ body {
 .donate-card {
     background: rgba(23, 23, 0, 0.5); 
     backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-    
     border: 1px solid rgba(255, 215, 0, 0.2);
-    
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px;
+    border-radius: 16px; /* Slightly smaller radius */
+    padding: 12px 15px; /* Compact padding */
+    margin-bottom: 15px;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -239,22 +257,22 @@ body {
 }
 
 .donate-header {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-bottom: 15px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-bottom: 10px;
 }
 
 .donate-title-text {
-    font-size: 16px;
+    font-size: 14px; /* Smaller font */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     background: var(--gold-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .donate-star-glow {
-    font-size: 18px;
+    font-size: 14px; /* Smaller star */
     color: #FDB931;
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
     animation: gentlePulse 3s infinite ease-in-out;
@@ -268,38 +286,38 @@ body {
 .donate-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
+    gap: 8px; /* Tighter gap */
 }
 
 .donate-btn {
     background: var(--gold-bg-subtle);
     border: 1px solid var(--gold-border-color);
-    border-radius: 35px;
-    padding: 8px 5px;
+    border-radius: 20px; /* More rounded/compact */
+    padding: 6px 4px; /* Less padding */
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    display: flex; align-items: center; justify-content: center; gap: 5px;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
     position: relative;
 }
 
 .donate-btn.popular {
-    font-size: 20px;
+    font-size: 16px;
     background: rgba(253, 185, 49, 0.15);
     border-color: rgba(253, 185, 49, 0.7);
-    transform: scale(1.03);
+    transform: scale(1.02);
     z-index: 2;
-    box-shadow: 0 5px 15px rgba(253, 185, 49, 0.1);
+    box-shadow: 0 4px 10px rgba(253, 185, 49, 0.1);
 }
 
 .d-amount {
-    font-size: 19px;
+    font-size: 15px; /* Smaller numbers */
     font-weight: 600;
     color: #ffd700;
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
 }
 
 .d-icon {
-    font-size: 12px;
+    font-size: 10px;
     color: #ffd700;
     margin-bottom: 0px;
 }
@@ -311,41 +329,28 @@ body {
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
+/* Donate Light Theme Overrides */
 [data-theme="light"] .donate-card {
     background: rgba(225, 251, 0, 0.1);
     border: 2px solid rgba(184, 134, 11, 0.3);
 }
-[data-theme="light"] .d-amount {
-    color: #c9952c;
-    text-shadow: none;
-}
-
-[data-theme="light"] .d-icon {
-    font-size: 12px;
-    color: #c9952c;
-    margin-bottom: 0px;
-}
-
+[data-theme="light"] .d-amount { color: #c9952c; text-shadow: none; }
+[data-theme="light"] .d-icon { color: #c9952c; }
 [data-theme="light"] .donate-btn {
     background: rgba(212, 175, 55, 0.1);
     border: 2px solid rgba(212, 175, 55, 0.3);
 }
-
 [data-theme="light"] .donate-btn:active {
     transform: scale(0.95);
     background: rgba(230, 230, 0, 0.2);
     border: 2px solid rgba(212, 175, 55, 0.3);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
-
 [data-theme="light"] .donate-title-text {
     background: linear-gradient(135deg, #c9952c 0%, #e3bf00 100%);
     -webkit-background-clip: text;
 }
-
-[data-theme="light"] .donate-star-glow {
-    color: #e0b124;
-}
+[data-theme="light"] .donate-star-glow { color: #e0b124; }
 
 /* --- BOTTOM NAVIGATION BAR --- */
 .bottom-bar {
@@ -359,7 +364,7 @@ body {
 .nav-item.active { color: var(--accent); transform: scale(1.1); }
 .fab-add { 
     position: fixed; bottom: 95px; right: 20px; width: 50px; height: 50px; 
-    background: var(--accent); color: var(--bg-color); /* Иконка контрастная к фону */
+    background: var(--accent); color: var(--bg-color);
     border-radius: 50%; display: flex; align-items: center; justify-content: center; 
     font-size: 24px; box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2); z-index: 90; display: none; 
 }
@@ -399,11 +404,18 @@ body {
 .setting-label { display: flex; align-items: center; gap: 10px; font-size: 15px; }
 .setting-row.danger { color: var(--danger); border-color: rgba(255, 69, 58, 0.2); cursor: pointer; }
 
-/* --- SEGMENTED CONTROL --- */
+/* --- SEGMENTED CONTROL (REFINED) --- */
 .segmented-control {
-    display: flex; background: rgba(120, 120, 128, 0.2); padding: 2px;
-    border-radius: 8px; position: relative; width: 200px; height: 32px;
+    display: flex; 
+    background: rgba(120, 120, 128, 0.2); 
+    padding: 4px; /* Internal padding for "floating" effect */
+    border-radius: 12px; /* More rounded container */
+    position: relative; 
+    width: 200px; 
+    height: 36px; /* Slightly taller to accommodate padding */
+    box-sizing: border-box;
 }
+
 .segmented-option {
     flex: 1; z-index: 2; display: flex; align-items: center; justify-content: center;
     font-size: 13px; font-weight: 500; cursor: pointer; transition: color 0.3s;
@@ -414,20 +426,26 @@ body {
 /* Glider */
 .segmented-glider {
     position: absolute;
-    top: 2px; 
-    bottom: 2px;
-    left: 2px; 
-    width: calc(50% - 4px);
+    top: 4px; 
+    bottom: 4px;
+    left: 4px; 
+    
+    /* Width logic: (100% - padding*2) / num_options */
+    width: calc((100% - 8px) / 2);
     
     background: var(--glider-bg); 
     
     border: 1px solid var(--glass-border);
     box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    border-radius: 6px;
+    border-radius: 9px; /* Rounded glider */
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 1;
 }
-.segmented-control.three-options .segmented-glider { width: calc(33.33% - 4px); }
+
+/* Specific width for 3 options */
+.segmented-control.three-options .segmented-glider { 
+    width: calc((100% - 8px) / 3); 
+}
 
 
 /* --- MODALS & MENUS --- */
