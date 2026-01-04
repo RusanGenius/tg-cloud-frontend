@@ -318,12 +318,12 @@ body {
 
 @keyframes btnPulse {
     0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.6)); }
-    50% { transform: scale(1.03); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+    50% { transform: scale(1.04); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.2)); }
 }
 
 @keyframes btn2Pulse {
     0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255, 215, 0, 0.6)); }
-    50% { transform: scale(1.05); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4)); }
+    50% { transform: scale(1.06); filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.2)); }
 }
 
 .d-amount {
