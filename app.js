@@ -22,7 +22,7 @@ const translations = {
         settings_title: "Настройки", stat_photos: "Фото", stat_videos: "Видео", stat_files: "Файлы", stat_folders: "Папки",
         used: "Занято", unlimited: "Безлимит",
         theme: "Тема", theme_dark: "Тёмная", theme_light: "Светлая",
-        grid_size: "Сетка", sort: "Сорт...",
+        grid_size: "Сетка", sort: "Сортир.",
         language: "Язык", delete_all: "Удалить все данные", 
         action_info: "Инфо", action_share: "Поделиться", action_move: "В папку", action_rename: "Переименовать", action_remove: "Убрать", action_delete: "Удалить", action_delete_rec: "Удалить с файлами",
         file_info: "Свойства", info_name: "Имя", info_type: "Тип", info_size: "Размер", info_date: "Дата",
