@@ -33,7 +33,7 @@
     --glider-bg: #ffffff;
     --save-bg: rgba(76, 204, 67, 0.6);
     --name-bg: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
-    --text-shadow: 0 1px 1px rgba(0,0,0,1);
+    --text-shadow: 0 0px 2px rgba(0,0,0,1);
 }
 
 [data-theme="light"] .item {
