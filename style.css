@@ -115,7 +115,7 @@ body {
 .folder-icon, .file-icon, .icon-video {
     margin-bottom: auto; 
     margin-top: auto;
-    padding-bottom: -2px;
+    padding-bottom: -10px;
     z-index: 2;
     transition: font-size 0.2s ease;
 }
