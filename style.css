@@ -20,7 +20,7 @@
 /* --- LIGHT THEME --- */
 [data-theme="light"] {
     --bg-color: #f2f2f7;
-    --glass-bg: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(0, 0, 0, 0.05);
     --accent: black;
     --text-primary: #000000;
