@@ -19,10 +19,10 @@
 
 /* --- LIGHT THEME --- */
 [data-theme="light"] {
-    --bg-color: #f2f2f7; /* Светло-серый iOS */
+    --bg-color: #f2f2f7;
     --glass-bg: rgba(255, 255, 255, 0.75);
     --glass-border: rgba(0, 0, 0, 0.05);
-    --accent: #007aff; /* Синий */
+    --accent: black;
     --text-primary: #000000;
     --text-secondary: #6e6e73;
     --danger: #ff3b30;
@@ -73,7 +73,6 @@ body {
     transition: filter 0.3s ease, padding-top 0.3s ease;
 }
 
-/* Dynamic columns */
 .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
 .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -111,7 +110,6 @@ body {
 }
 .item-preview { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; opacity: 0.9; transition: opacity 0.2s; }
 
-/* Icons & Dynamic Sizing based on Grid */
 .folder-icon, .file-icon, .icon-video {
     margin-bottom: auto; 
     margin-top: auto;
@@ -123,17 +121,17 @@ body {
 .folder-icon { color: #ffd60a; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .file-icon, .icon-video { color: var(--text-secondary); }
 
-/* Grid 4 (Default / Small) */
+/* Grid 4 */
 .folder-icon, .file-icon, .icon-video { font-size: 30px; }
 .menu-btn { font-size: 14px; padding: 8px; }
 
-/* Grid 3 (Medium) */
+/* Grid 3 */
 .grid.cols-3 .folder-icon, 
 .grid.cols-3 .file-icon, 
 .grid.cols-3 .icon-video { font-size: 40px; }
 .grid.cols-3 .item .menu-btn { font-size: 18px; padding: 10px; }
 
-/* Grid 2 (Large) */
+/* Grid 2 */
 .grid.cols-2 .folder-icon, 
 .grid.cols-2 .file-icon, 
 .grid.cols-2 .icon-video { font-size: 55px; }
@@ -149,13 +147,10 @@ body {
     cursor: pointer;
 }
 
-/* Light Theme Menu Button Logic */
-/* 1. Если есть превью (фото) - кнопка белая с тенью (как и раньше) */
 [data-theme="light"] .item:has(.item-preview) .menu-btn {
     color: #ffffff;
     text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
-/* 2. Если превью нет (документ/видео/папка) - кнопка тёмно-серая без тени */
 [data-theme="light"] .item:not(:has(.item-preview)) .menu-btn {
     color: #555555;
     text-shadow: none;
@@ -178,16 +173,10 @@ body {
     text-shadow: var(--text-shadow);
 }
 
-/* 
-   Специальное правило для СВЕТЛОЙ темы для файлов БЕЗ превью:
-   1. Цвет текста черный.
-   2. Убираем тень текста.
-   3. Нижний градиент (тень фона) делаем еле заметным (0.1 вместо 0.3).
-*/
 [data-theme="light"] .item:not(:has(.item-preview)) .name {
     color: #000000;
     text-shadow: none;
-    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
+    background: linear-gradient(to top, rgba(0,0,0,0.15), transparent);
 }
 
 /* --- DOWNLOAD ANIMATION (Green checkmark) --- */
@@ -254,8 +243,8 @@ body {
     background: rgba(23, 23, 0, 0.5); 
     backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 215, 0, 0.2);
-    border-radius: 16px; /* Slightly smaller radius */
-    padding: 12px 30px; /* Compact padding */
+    border-radius: 16px;
+    padding: 12px 30px;
     margin-bottom: 15px;
     text-align: center;
     position: relative;
@@ -269,11 +258,11 @@ body {
 
 .donate-header {
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .donate-title-text {
-    font-size: 14px; /* Smaller font */
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -283,28 +272,28 @@ body {
 }
 
 .donate-star-glow {
-    font-size: 14px; /* Smaller star */
+    font-size: 14px;
     color: #FDB931;
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-    animation: gentlePulse 3s infinite ease-in-out;
+    animation: gentlePulse 2s infinite ease-in-out;
 }
 
 @keyframes gentlePulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)); }
-    50% { transform: scale(1.1); filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); }
+    0%, 100% { transform: scale(0.9); filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)); }
+    50% { transform: scale(1.3); filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); }
 }
 
 .donate-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 15px; /* Tighter gap */
+    gap: 15px;
 }
 
 .donate-btn {
     background: var(--gold-bg-subtle);
     border: 1px solid var(--gold-border-color);
-    border-radius: 20px; /* More rounded/compact */
-    padding: 6px 4px; /* Less padding */
+    border-radius: 20px;
+    padding: 6px 4px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex; align-items: center; justify-content: center; gap: 4px;
@@ -342,7 +331,7 @@ body {
 
 /* Donate Light Theme Overrides */
 [data-theme="light"] .donate-card {
-    background: rgba(225, 251, 0, 0.1);
+    background: rgba(225, 251, 0, 0.05);
     border: 2px solid rgba(184, 134, 11, 0.3);
 }
 [data-theme="light"] .d-amount { color: #c9952c; text-shadow: none; }
