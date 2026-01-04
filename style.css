@@ -124,19 +124,19 @@ body {
 .file-icon, .icon-video { color: var(--text-secondary); }
 
 /* Grid 4 (Default / Small) */
-.folder-icon, .file-icon, .icon-video { font-size: 35px; }
+.folder-icon, .file-icon, .icon-video { font-size: 30px; }
 .menu-btn { font-size: 14px; padding: 8px; }
 
 /* Grid 3 (Medium) */
 .grid.cols-3 .folder-icon, 
 .grid.cols-3 .file-icon, 
-.grid.cols-3 .icon-video { font-size: 50px; }
+.grid.cols-3 .icon-video { font-size: 40px; }
 .grid.cols-3 .item .menu-btn { font-size: 18px; padding: 10px; }
 
 /* Grid 2 (Large) */
 .grid.cols-2 .folder-icon, 
 .grid.cols-2 .file-icon, 
-.grid.cols-2 .icon-video { font-size: 70px; }
+.grid.cols-2 .icon-video { font-size: 55px; }
 .grid.cols-2 .item .menu-btn { font-size: 22px; padding: 12px; }
 
 
