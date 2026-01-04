@@ -26,8 +26,8 @@
     --text-primary: #000000;
     --text-secondary: #6e6e73;
     --danger: #ff3b30;
-    --nav-bg: rgba(255, 255, 255, 0.9);
-    --modal-bg: rgba(255, 255, 255, 0.6);
+    --nav-bg: rgba(255, 255, 255, 0.6);
+    --modal-bg: rgba(255, 255, 255, 0.9);
     --modal-border: rgba(0, 0, 0, 0.1);
     --input-bg: rgba(120, 120, 128, 0.1);
     --glider-bg: #ffffff;
