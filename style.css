@@ -7,8 +7,8 @@
     --text-primary: #ffffff;
     --text-secondary: #8e8e93;
     --danger: #ff453a;
-    --nav-bg: rgba(20, 20, 20, 0.85);
-    --modal-bg: rgba(21, 21, 21, 0.85);
+    --nav-bg: rgba(20, 20, 20, 0.6);
+    --modal-bg: rgba(21, 21, 21, 0.6);
     --modal-border: rgba(255, 255, 255, 0.1);
     --input-bg: rgba(120, 120, 128, 0.2);
     --glider-bg: #141414;
@@ -29,7 +29,7 @@
     --glass-border: rgba(255, 255, 255, 0.6);
     
     --accent: #000000;
-    --text-primary: #000000;
+    --text-primary: #ffffff;
     --text-secondary: #6e6e73;
     --danger: #ff3b30;
     
