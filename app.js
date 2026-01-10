@@ -35,7 +35,13 @@ const translations = {
         welcome_title: "Как это работает?",
         welcome_step1: "1. Отправьте файл (фото, видео, док) боту.",
         welcome_step2: "2. Он автоматически сохранится в облаке.",
-        welcome_step3: "3. Нажмите на файл, чтобы получить его обратно."
+        welcome_step3: "3. Нажмите на файл, чтобы получить его обратно.",
+        empty_all: "Нет элементов",
+        empty_image: "Фотографии отсутствуют",
+        empty_video: "Видеозаписи отсутствуют",
+        empty_doc: "Документы не найдены",
+        empty_folders: "Папок нет",
+        empty_folder_content: "Эта папка пуста"
     },
     en: {
         loading: "Loading...", empty: "Empty", back: "Back", save_all: "Save all",
@@ -55,7 +61,13 @@ const translations = {
         welcome_title: "How does it work?",
         welcome_step1: "1. Send a file (photo, video, doc) to the bot.",
         welcome_step2: "2. It automatically saves to your cloud.",
-        welcome_step3: "3. Tap the file to retrieve it."
+        welcome_step3: "3. Tap the file to retrieve it.",
+        empty_all: "No items",
+        empty_image: "No photos yet",
+        empty_video: "No videos yet",
+        empty_doc: "No documents found",
+        empty_folders: "No folders",
+        empty_folder_content: "This folder is empty"
     }
 };
 
@@ -357,12 +369,16 @@ async function loadData() {
 }
 
 function renderGrid() {
-    const grid=document.getElementById('file-grid');
-    grid.innerHTML=''; grid.className='grid';
+    const grid = document.getElementById('file-grid');
+    grid.innerHTML = ''; 
+    grid.className = 'grid';
     grid.classList.add(`cols-${currentGrid}`);
     if(currentState.folderId) grid.classList.add('with-nav');
 
-    let items=currentState.cache;
+    const totalUserFilesCount = currentState.cache.length;
+
+    let items = currentState.cache;
+    
     if(!currentState.folderId) {
         if(currentState.tab==='folders') items=items.filter(i=>i.type==='folder');
         else if(currentState.tab==='image') items=items.filter(i=>i.name.match(/\.(jpg|jpeg|png)$/i));
@@ -371,12 +387,25 @@ function renderGrid() {
         else items=items.filter(i=>i.type!=='folder');
     }
 
-    items.sort((a,b)=>{ if(currentSort==='name') return a.name.localeCompare(b.name); if(currentSort==='size') return (b.size||0)-(a.size||0); return new Date(b.created_at)-new Date(a.created_at); });
+    items.sort((a,b)=>{ 
+        if(currentSort==='name') return a.name.localeCompare(b.name); 
+        if(currentSort==='size') return (b.size||0)-(a.size||0); 
+        return new Date(b.created_at)-new Date(a.created_at); 
+    });
 
-    if(items.length===0) { 
-        if(currentState.tab === 'folders' || currentState.folderId) {
-            grid.innerHTML = `<div class="empty-simple">${t('empty')}</div>`;
-        } else {
+    if(items.length === 0) { 
+        
+        if(currentState.folderId) {
+             grid.innerHTML = `<div class="empty-pro"><i class="far fa-folder-open"></i><p>${t('empty_folder_content')}</p></div>`;
+             return;
+        }
+
+        if(currentState.tab === 'folders') {
+            grid.innerHTML = `<div class="empty-pro"><i class="fas fa-folder-open"></i><p>${t('empty_folders')}</p></div>`;
+            return;
+        }
+
+        if (totalUserFilesCount === 0) {
             grid.innerHTML = `
                 <div class="welcome-screen">
                     <img src="logo.png" class="welcome-logo" alt="Logo">
@@ -387,7 +416,17 @@ function renderGrid() {
                         <p>${t('welcome_step3')}</p>
                     </div>
                 </div>`;
+            return;
         }
+
+        let icon = 'fa-inbox';
+        let textKey = 'empty_all';
+
+        if(currentState.tab === 'image') { icon = 'fa-image'; textKey = 'empty_image'; }
+        else if(currentState.tab === 'video') { icon = 'fa-video'; textKey = 'empty_video'; }
+        else if(currentState.tab === 'doc') { icon = 'fa-file-alt'; textKey = 'empty_doc'; }
+
+        grid.innerHTML = `<div class="empty-pro"><i class="fas ${icon}"></i><p>${t(textKey)}</p></div>`;
         return; 
     }
 
