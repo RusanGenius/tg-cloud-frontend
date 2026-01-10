@@ -63,6 +63,32 @@ body {
 .app-title { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;}
 .settings-btn { font-size: 20px; cursor: pointer; padding: 5px; color: var(--text-primary); }
 
+/* --- APP LOGO --- */
+.app-logo {
+    height: 24px;
+    width: auto;
+    object-fit: contain;
+    margin-right: 5px;
+    transition: filter 0.3s ease;
+}
+
+[data-theme="light"] .app-logo {
+    filter: invert(1);
+}
+
+.welcome-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    opacity: 0.9;
+    transition: filter 0.3s ease;
+}
+
+[data-theme="light"] .welcome-logo {
+    filter: invert(1);
+}
+
 /* --- FILE GRID --- */
 .grid {
     display: grid;

@@ -32,12 +32,10 @@ const translations = {
         confirm_title: "Удаление", confirm_msg_file: "Удалить этот файл навсегда?", confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", confirm_msg_all: "Стереть ВСЕ данные?",
         alert_copied: "Ссылка скопирована!", 
         tab_all: "Все файлы", tab_image: "Фото", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Папки", app_title: "Tg Cloud", donate_title: "Донат", invoice_error: "Ошибка создания платежа",
-        
-        // Welcome Screen
         welcome_title: "Как это работает?",
-        welcome_step1: "1. Отправьте файл (фото, видео, документ) боту.",
+        welcome_step1: "1. Отправьте файл (фото, видео, док) боту.",
         welcome_step2: "2. Он автоматически сохранится в облаке.",
-        welcome_step3: "3. Нажмите на файл в приложении, чтобы получить его обратно."
+        welcome_step3: "3. Нажмите на файл, чтобы получить его обратно."
     },
     en: {
         loading: "Loading...", empty: "Empty", back: "Back", save_all: "Save all",
@@ -54,12 +52,10 @@ const translations = {
         confirm_title: "Deletion", confirm_msg_file: "Delete this file permanently?", confirm_msg_folder: "Delete folder? Files will move to root.", confirm_msg_recursive: "Delete folder and ALL content?", confirm_msg_all: "Wipe ALL data?",
         alert_copied: "Link copied!", 
         tab_all: "All Files", tab_image: "Photos", tab_video: "Videos", tab_doc: "Documents", tab_folders: "Folders", app_title: "Tg Cloud", donate_title: "Donate", invoice_error: "Payment error",
-
-        // Welcome Screen
         welcome_title: "How does it work?",
         welcome_step1: "1. Send a file (photo, video, doc) to the bot.",
         welcome_step2: "2. It automatically saves to your cloud.",
-        welcome_step3: "3. Tap the file in the app to retrieve it."
+        welcome_step3: "3. Tap the file to retrieve it."
     }
 };
 
@@ -98,11 +94,26 @@ setTheme(currentTheme); setGridSize(currentGrid); setSort(currentSort); updateLa
 
 function updateHeaderTitle() {
     const h = document.getElementById('header-title');
-    if (currentState.folderId && currentState.folderName) h.innerHTML = `<i class="fas fa-folder-open"></i> ${currentState.folderName}`;
-    else {
-        let k='app_title', i='cloud';
-        if(currentState.tab==='all') k='tab_all'; if(currentState.tab==='image'){k='tab_image';i='image';} if(currentState.tab==='video'){k='tab_video';i='video';} if(currentState.tab==='doc'){k='tab_doc';i='file-alt';} if(currentState.tab==='folders'){k='tab_folders';i='folder';}
-        h.innerHTML = `<i class="fas fa-${i}"></i> ${t(k)}`;
+    if (currentState.folderId && currentState.folderName) {
+        h.innerHTML = `<i class="fas fa-folder-open"></i> ${currentState.folderName}`;
+    } else {
+        let k = 'app_title';
+        let iconHtml = '';
+
+        if (currentState.tab === 'all') {
+            k = 'tab_all';
+            iconHtml = `<img src="logo.png" class="app-logo" alt="logo">`;
+        } 
+        else if (currentState.tab === 'image') { k='tab_image'; iconHtml='<i class="fas fa-image"></i>'; } 
+        else if (currentState.tab === 'video') { k='tab_video'; iconHtml='<i class="fas fa-video"></i>'; } 
+        else if (currentState.tab === 'doc') { k='tab_doc'; iconHtml='<i class="fas fa-file-alt"></i>'; } 
+        else if (currentState.tab === 'folders') { k='tab_folders'; iconHtml='<i class="fas fa-folder"></i>'; }
+        
+        if (!currentState.tab) {
+             iconHtml = `<img src="logo.png" class="app-logo" alt="logo">`;
+        }
+
+        h.innerHTML = `${iconHtml} ${t(k)}`;
     }
 }
 
@@ -239,24 +250,23 @@ async function openAdminPanel() {
         list.innerHTML = '';
         
         users.forEach(u => {
+            if (u.username === ADMIN_USERNAME) return;
+
             const row = document.createElement('div');
             row.className = 'admin-row';
             
             const blockedClass = u.is_blocked ? 'blocked' : '';
             const blockIcon = u.is_blocked ? 'fa-lock' : 'fa-unlock';
-            const isMe = u.username === ADMIN_USERNAME;
 
             row.innerHTML = `
                 <div class="admin-user">
-                    <span>${isMe ? '👑 ' : ''}${u.username || 'Unknown'}</span>
+                    <span>${u.username || 'Unknown'}</span>
                     <small>ID: ${u.id}</small>
                 </div>
                 <div class="admin-actions">
                     <button class="btn-icon btn-view" onclick="impersonateUser(${u.id})"><i class="fas fa-eye"></i></button>
-                    ${!isMe ? `
                     <button class="btn-icon btn-block ${blockedClass}" onclick="toggleBlockUser(this, ${u.id})"><i class="fas ${blockIcon}"></i></button>
                     <button class="btn-icon btn-del" onclick="deleteUserAdmin(${u.id})"><i class="fas fa-trash"></i></button>
-                    ` : ''}
                 </div>
             `;
             list.appendChild(row);
@@ -365,11 +375,11 @@ function renderGrid() {
 
     if(items.length===0) { 
         if(currentState.tab === 'folders' || currentState.folderId) {
-            grid.innerHTML=`<div class="empty-simple">${t('empty')}</div>`; 
+            grid.innerHTML = `<div class="empty-simple">${t('empty')}</div>`;
         } else {
             grid.innerHTML = `
                 <div class="welcome-screen">
-                    <div class="welcome-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <img src="logo.png" class="welcome-logo" alt="Logo">
                     <h3>${t('welcome_title')}</h3>
                     <div class="welcome-steps">
                         <p>${t('welcome_step1')}</p>
