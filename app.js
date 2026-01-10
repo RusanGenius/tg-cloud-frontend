@@ -31,7 +31,13 @@ const translations = {
         prompt_rename: "Новое имя", prompt_folder_name: "Имя папки",
         confirm_title: "Удаление", confirm_msg_file: "Удалить этот файл навсегда?", confirm_msg_folder: "Удалить папку? Файлы переместятся в корень.", confirm_msg_recursive: "Удалить папку и ВСЕ файлы внутри?", confirm_msg_all: "Стереть ВСЕ данные?",
         alert_copied: "Ссылка скопирована!", 
-        tab_all: "Все файлы", tab_image: "Фото", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Папки", app_title: "Tg Cloud", donate_title: "Донат", invoice_error: "Ошибка создания платежа"
+        tab_all: "Все файлы", tab_image: "Фото", tab_video: "Видео", tab_doc: "Документы", tab_folders: "Папки", app_title: "Tg Cloud", donate_title: "Донат", invoice_error: "Ошибка создания платежа",
+        
+        // Welcome Screen
+        welcome_title: "Как это работает?",
+        welcome_step1: "1. Отправьте файл (фото, видео, документ) боту.",
+        welcome_step2: "2. Он автоматически сохранится в облаке.",
+        welcome_step3: "3. Нажмите на файл в приложении, чтобы получить его обратно."
     },
     en: {
         loading: "Loading...", empty: "Empty", back: "Back", save_all: "Save all",
@@ -47,7 +53,13 @@ const translations = {
         prompt_rename: "New name", prompt_folder_name: "Folder name",
         confirm_title: "Deletion", confirm_msg_file: "Delete this file permanently?", confirm_msg_folder: "Delete folder? Files will move to root.", confirm_msg_recursive: "Delete folder and ALL content?", confirm_msg_all: "Wipe ALL data?",
         alert_copied: "Link copied!", 
-        tab_all: "All Files", tab_image: "Photos", tab_video: "Videos", tab_doc: "Documents", tab_folders: "Folders", app_title: "Tg Cloud", donate_title: "Donate", invoice_error: "Payment error"
+        tab_all: "All Files", tab_image: "Photos", tab_video: "Videos", tab_doc: "Documents", tab_folders: "Folders", app_title: "Tg Cloud", donate_title: "Donate", invoice_error: "Payment error",
+
+        // Welcome Screen
+        welcome_title: "How does it work?",
+        welcome_step1: "1. Send a file (photo, video, doc) to the bot.",
+        welcome_step2: "2. It automatically saves to your cloud.",
+        welcome_step3: "3. Tap the file in the app to retrieve it."
     }
 };
 
@@ -169,7 +181,6 @@ async function openSettings() {
     updateSlider('theme-switch', 'theme-glider', currentTheme); updateSlider('lang-switch', 'lang-glider', currentLang);
     updateSlider('grid-switch', 'grid-glider', currentGrid.toString()); updateSlider('sort-switch', 'sort-glider', currentSort);
     
-    // Load stats for the current USER_ID
     try { 
         const res = await fetch(`${API_URL}/api/profile?user_id=${USER_ID}`);
         if(res.status === 403) {
@@ -182,7 +193,6 @@ async function openSettings() {
         document.getElementById('storage-used').innerText=s.total_size_mb+' MB';
     } catch(e){}
 
-    // Display profile information
     const user = tg.initDataUnsafe?.user;
     
     if (USER_ID === REAL_USER_ID && user) {
@@ -319,7 +329,6 @@ async function loadData() {
         
         const res = await fetch(url);
         
-        // Handle user blocking
         if(res.status === 403) {
             document.getElementById('loading-overlay').style.display='none';
             document.getElementById('blocked-screen').style.display = 'flex';
@@ -354,7 +363,23 @@ function renderGrid() {
 
     items.sort((a,b)=>{ if(currentSort==='name') return a.name.localeCompare(b.name); if(currentSort==='size') return (b.size||0)-(a.size||0); return new Date(b.created_at)-new Date(a.created_at); });
 
-    if(items.length===0) { grid.innerHTML=`<div style="color:var(--text-secondary); text-align:center; grid-column:1/-1; padding-top:50px;">${t('empty')}</div>`; return; }
+    if(items.length===0) { 
+        if(currentState.tab === 'folders' || currentState.folderId) {
+            grid.innerHTML=`<div class="empty-simple">${t('empty')}</div>`; 
+        } else {
+            grid.innerHTML = `
+                <div class="welcome-screen">
+                    <div class="welcome-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <h3>${t('welcome_title')}</h3>
+                    <div class="welcome-steps">
+                        <p>${t('welcome_step1')}</p>
+                        <p>${t('welcome_step2')}</p>
+                        <p>${t('welcome_step3')}</p>
+                    </div>
+                </div>`;
+        }
+        return; 
+    }
 
     items.forEach(item => {
         const el=document.createElement('div'); el.className='item'; el.id=`item-${item.id}`;

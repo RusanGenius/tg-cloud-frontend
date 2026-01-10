@@ -80,6 +80,64 @@ body {
 .grid.with-nav { padding-top: 100px; }
 .grid.blurred { filter: blur(5px); pointer-events: none; }
 
+/* --- EMPTY STATE & WELCOME SCREEN --- */
+
+.empty-simple {
+    color: var(--text-secondary);
+    text-align: center;
+    grid-column: 1 / -1;
+    padding-top: 50px;
+    font-size: 16px;
+}
+
+.welcome-screen {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    animation: popIn 0.3s ease-out;
+}
+
+.welcome-icon {
+    font-size: 50px;
+    margin-bottom: 20px;
+    color: var(--accent);
+    opacity: 0.8;
+}
+
+.welcome-screen h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.welcome-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 320px;
+    text-align: left;}
+
+.welcome-steps p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    background: var(--glass-bg);
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+[data-theme="light"] .welcome-steps p {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
 /* --- TOP NAVIGATION (Inside folders) --- */
 .top-nav {
     position: fixed; top: 50px; left: 0; right: 0; height: 40px;
@@ -327,7 +385,7 @@ body {
 }
 
 .d-amount {
-    font-size: 15px; /* Smaller numbers */
+    font-size: 15px;
     font-weight: 600;
     color: #ffd700;
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
@@ -425,12 +483,12 @@ body {
 .segmented-control {
     display: flex; 
     background: rgba(120, 120, 128, 0.2); 
-    padding: 4px; /* Внутренний отступ (рамка) */
-    border-radius: 30px; /* Полное скругление (pill-shape) */
+    padding: 4px;
+    border-radius: 30px;
     position: relative; 
     width: 200px; 
-    height: 40px; /* Чуть выше для комфортного нажатия */
-    box-sizing: border-box; /* Критически важно для ровных рамок */
+    height: 40px;
+    box-sizing: border-box;
 }
 
 .segmented-option {
@@ -454,22 +512,19 @@ body {
     bottom: 4px;
     left: 4px; 
     
-    /* Формула: (100% ширины - (padding * 2)) / кол-во опций */
     width: calc((100% - 8px) / 2);
     
     background: var(--glider-bg); 
     
-    /* Убираем лишние бордеры, оставляем тень для объема */
     border: 1px solid var(--glass-border);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     
-    border-radius: 30px; /* Скругление глайдера под контейнер */
+    border-radius: 30px;
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 1;
     box-sizing: border-box;
 }
 
-/* Корректировка ширины для 3 опций (Сетка, Сортировка) */
 .segmented-control.three-options .segmented-glider { 
     width: calc((100% - 8px) / 3); 
 }
@@ -573,6 +628,6 @@ body {
 [data-theme="light"] .storage-section,
 [data-theme="light"] .setting-row,
 [data-theme="light"] .stat-item {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Мягкая, но заметная тень */
-    border-color: rgba(255, 255, 255, 0.8); /* Делаем границы чуть белее */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-color: rgba(255, 255, 255, 0.8);
 }
