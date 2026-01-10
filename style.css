@@ -63,6 +63,34 @@ body {
 .app-title { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;}
 .settings-btn { font-size: 20px; cursor: pointer; padding: 5px; color: var(--text-primary); }
 
+/* --- PROFESSIONAL EMPTY STATE --- */
+
+.empty-pro {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-top: 80px;
+    color: var(--text-secondary);
+    animation: fadeIn 0.4s ease;
+}
+
+.empty-pro i {
+    font-size: 40px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-pro p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 /* --- APP LOGO --- */
 .app-logo {
     height: 24px;
