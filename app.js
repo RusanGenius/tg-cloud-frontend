@@ -41,7 +41,11 @@ const translations = {
         empty_video: "Видеозаписи отсутствуют",
         empty_doc: "Документы отсутствуют",
         empty_folders: "Папок нет",
-        empty_folder_content: "Эта папка пуста"
+        empty_folder_content: "Эта папка пуста",
+        selected_txt: "выбрано",
+        bulk_del_confirm: "Удалить выбранные объекты?",
+        bulk_deleted: "Удалено",
+        bulk_moved: "Перемещено",
     },
     en: {
         loading: "Loading...", empty: "Empty", back: "Back", save_all: "Save all",
@@ -67,7 +71,11 @@ const translations = {
         empty_video: "No videos yet",
         empty_doc: "No documents yet",
         empty_folders: "No folders yet",
-        empty_folder_content: "This folder is empty"
+        empty_folder_content: "This folder is empty",
+        selected_txt: "selected",
+        bulk_del_confirm: "Delete selected items?",
+        bulk_deleted: "Deleted",
+        bulk_moved: "Moved",
     }
 };
 
@@ -687,7 +695,7 @@ function toggleSelection(itemId) {
 }
 
 function updateSelectionUI() {
-    document.getElementById('selection-count').innerText = `${currentState.selectedFiles.size} выбрано`;
+    document.getElementById('selection-count').innerText = `${currentState.selectedFiles.size} ${t('selected_txt')}`;
 }
 
 // --- BULK ACTIONS ---
@@ -696,7 +704,6 @@ function bulkShare() {
     const ids = Array.from(currentState.selectedFiles);
     if (!ids.length) return;
     
-    // Generate links list
     const links = ids.map(id => {
         const item = currentState.cache.find(i => i.id === id);
         const prefix = item.type === 'folder' ? 'folder_' : 'file_';
@@ -711,7 +718,7 @@ function bulkShare() {
 
 function bulkDelete() {
     const count = currentState.selectedFiles.size;
-    openConfirm(t('confirm_title'), `Удалить выбранные объекты (${count})?`, async () => {
+    openConfirm(t('confirm_title'), `${t('bulk_del_confirm')} (${count})`, async () => {
         tg.MainButton.showProgress();
         const ids = Array.from(currentState.selectedFiles);
         
@@ -719,12 +726,6 @@ function bulkDelete() {
         for (const id of ids) {
              const item = currentState.cache.find(i => i.id === id);
              if (!item) continue;
-             
-             // Check if folder recursive logic needed? 
-             // Simplification: Use normal delete endpoint which handles items. 
-             // If folder, use recursive if implied, or standard.
-             // For bulk, let's assume standard delete for files, and recursive for folders if user agrees (complex).
-             // Let's stick to standard delete logic for now.
              
              let url = `${API_URL}/api/delete`;
              if (item.type === 'folder') url = `${API_URL}/api/delete_folder_recursive`; // Safer for UX to assume recursive in bulk
@@ -737,7 +738,7 @@ function bulkDelete() {
         }
         
         tg.MainButton.hideProgress();
-        showToast(`Удалено: ${count}`);
+        showToast(`${t('bulk_deleted')}: ${count}`);
         exitSelectionMode();
         loadData();
     });
@@ -764,7 +765,6 @@ async function bulkMove() {
     };
     list.appendChild(div);
 
-    // Filter out folders that are currently selected (cannot move folder inside itself)
     const availableFolders = folders.filter(f => !currentState.selectedFiles.has(f.id));
 
     availableFolders.forEach(f => {
@@ -782,9 +782,6 @@ async function processBulkMove(targetFolderId) {
     const ids = Array.from(currentState.selectedFiles);
     
     for (const id of ids) {
-        // Folders cannot be moved via the current API move_file endpoint?
-        // Wait, main.py move_file endpoint updates "parent_id". It works for items (files and folders) if table structure allows.
-        // Assuming 'items' table stores both.
         await fetch(`${API_URL}/api/move_file`, {
             method:'POST', 
             headers:{'Content-Type':'application/json'}, 
@@ -793,7 +790,7 @@ async function processBulkMove(targetFolderId) {
     }
     
     tg.MainButton.hideProgress();
-    showToast(`Перемещено: ${ids.length}`);
+    showToast(`${t('bulk_moved')}: ${ids.length}`);
     exitSelectionMode();
     loadData();
 }
