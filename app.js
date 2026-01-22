@@ -474,8 +474,8 @@ function renderGrid() {
             pressTimer = setTimeout(() => {
                 enterSelectionMode(item.id);
                 // Optional: Vibrate
-                if (navigator.vibrate) navigator.vibrate(50);
-            }, 600); // 600ms hold
+                if (navigator.vibrate) navigator.vibrate(10);
+            }, 600);
         }, {passive: true});
 
         el.addEventListener('touchend', () => clearTimeout(pressTimer));
@@ -679,7 +679,6 @@ function toggleSelection(itemId) {
         exitSelectionMode(); // Exit if nothing selected
     } else {
         updateSelectionUI();
-        // Update specific item visually without full re-render (performance)
         const el = document.getElementById(`item-${itemId}`);
         const icon = el.querySelector('.select-indicator i');
         if (currentState.selectedFiles.has(itemId)) {
@@ -728,7 +727,7 @@ function bulkDelete() {
              if (!item) continue;
              
              let url = `${API_URL}/api/delete`;
-             if (item.type === 'folder') url = `${API_URL}/api/delete_folder_recursive`; // Safer for UX to assume recursive in bulk
+             if (item.type === 'folder') url = `${API_URL}/api/delete_folder_recursive`;
              
              await fetch(url, { 
                  method:'POST', 
