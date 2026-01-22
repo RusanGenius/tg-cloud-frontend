@@ -395,7 +395,7 @@ function renderGrid() {
     if(currentState.isSelectionMode) grid.classList.add('selection-mode');
 
     let items = currentState.cache;
-    // ... (фильтрация items остается той же, что и была - скопируй этот блок из старого кода или оставь как есть) ...
+    
     // FILTERING LOGIC START
     if(!currentState.folderId) {
         if(currentState.tab==='folders') items=items.filter(i=>i.type==='folder');
@@ -412,11 +412,9 @@ function renderGrid() {
     // FILTERING LOGIC END
 
     if(items.length === 0) { 
-        // ... (код для пустых состояний остается тем же) ...
-        // Скопируй блок обработки пустого списка из старого кода для экономии места
         if(currentState.folderId) { grid.innerHTML = `<div class="empty-pro"><i class="far fa-folder-open"></i><p>${t('empty_folder_content')}</p></div>`; return; }
         if(currentState.tab === 'folders') { grid.innerHTML = `<div class="empty-pro"><i class="fas fa-folder-open"></i><p>${t('empty_folders')}</p></div>`; return; }
-        if (items.length === 0 && currentState.cache.length === 0) { /* Welcome screen code */ } // Simplification for snippet
+        if (items.length === 0 && currentState.cache.length === 0) { /* Welcome screen code */ }
         grid.innerHTML = `<div class="empty-pro"><i class="fas fa-inbox"></i><p>${t('empty_all')}</p></div>`;
         return; 
     }
@@ -440,7 +438,7 @@ function renderGrid() {
             else c=`<i class="icon fas fa-file file-icon"></i>`;
         }
         
-        // Icon for selection mode (Checkmark vs Circle)
+        // Icon for selection mode
         const checkIcon = currentState.selectedFiles.has(item.id) ? 'fa-check-circle' : 'fa-circle';
         
         el.innerHTML = `
@@ -470,10 +468,9 @@ function renderGrid() {
         // 2. Long Press Handler
         let pressTimer;
         el.addEventListener('touchstart', (e) => {
-            if (currentState.isSelectionMode) return; // Already in mode
+            if (currentState.isSelectionMode) return;
             pressTimer = setTimeout(() => {
                 enterSelectionMode(item.id);
-                // Optional: Vibrate
                 if (navigator.vibrate) navigator.vibrate(10);
             }, 600);
         }, {passive: true});
