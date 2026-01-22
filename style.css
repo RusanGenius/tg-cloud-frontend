@@ -685,3 +685,93 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border-color: rgba(255, 255, 255, 0.8);
 }
+
+/* --- SELECTION MODE STYLES --- */
+
+/* Selection Header */
+.selection-header {
+    background: var(--nav-bg);
+    z-index: 61; /* Higher than normal header */
+}
+
+.cancel-btn {
+    font-size: 16px;
+    color: var(--accent);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.selection-count {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.selection-actions {
+    display: flex;
+    gap: 20px;
+    font-size: 20px;
+    color: var(--accent);
+}
+
+.selection-actions i {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.selection-actions i:active { transform: scale(0.8); }
+
+
+/* Item Selection Visuals */
+
+/* Hide menu button in selection mode */
+.grid.selection-mode .menu-btn {
+    display: none !important;
+}
+
+/* Checkbox (Circle) - Hidden by default, shown in selection mode */
+.select-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 15;
+    font-size: 22px;
+    display: none; /* Hidden normally */
+    color: rgba(255, 255, 255, 0.7);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+}
+
+[data-theme="light"] .select-indicator {
+    color: rgba(0, 0, 0, 0.4);
+    filter: none;
+}
+
+.grid.selection-mode .select-indicator {
+    display: block; /* Show circles everywhere in selection mode */
+}
+
+/* Selected State */
+.item.selected .select-indicator {
+    color: var(--accent); /* Filled color */
+    opacity: 1;
+}
+
+/* Transform Image/Icon when selected */
+.item.selected .item-preview,
+.item.selected .folder-icon,
+.item.selected .file-icon,
+.item.selected .icon-video {
+    transform: scale(0.85);
+    filter: brightness(0.7);
+}
+
+[data-theme="light"] .item.selected .item-preview,
+[data-theme="light"] .item.selected .folder-icon,
+[data-theme="light"] .item.selected .file-icon,
+[data-theme="light"] .item.selected .icon-video {
+    filter: brightness(0.9); /* Less dark on light theme */
+}
+
+/* Smooth transition for transform */
+.item-preview, .folder-icon, .file-icon, .icon-video {
+    transition: transform 0.2s ease, filter 0.2s ease;
+}

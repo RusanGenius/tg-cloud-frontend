@@ -30,6 +30,19 @@
         </div>
     </div>
 
+    <!-- SELECTION HEADER (Hidden by default) -->
+    <div class="app-header selection-header" id="selection-header" style="display: none;">
+        <div class="cancel-btn" onclick="exitSelectionMode()">
+            <span data-i18n="btn_cancel">Отмена</span>
+        </div>
+        <div class="selection-count" id="selection-count">0</div>
+        <div class="selection-actions">
+            <i class="fas fa-share-alt" onclick="bulkShare()"></i>
+            <i class="fas fa-folder-open" onclick="bulkMove()"></i>
+            <i class="fas fa-trash" onclick="bulkDelete()"></i>
+        </div>
+    </div>
+
     <!-- TOP NAVIGATION (Inside folders) -->
     <div class="top-nav" id="top-nav" style="display: none;">
         <div class="breadcrumbs" onclick="goBack()">
